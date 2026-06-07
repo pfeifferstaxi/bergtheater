@@ -12,63 +12,92 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
     <style>
-        /* =========================================
-           ALLGEMEINE STYLES
-           ========================================= */
-        body { 
-            -webkit-tap-highlight-color: transparent; 
-        }
+        body { -webkit-tap-highlight-color: transparent; }
         
-        #singlePrintArea { 
-            display: none; 
-        }
-
-        /* =========================================
-           DRUCK-STYLES (Print Media Query)
-           ========================================= */
         @media print {
-            .no-print { display: none !important; }
-            body { background-color: white; }
-            .event-card { break-inside: avoid; border: 1px solid #ccc; box-shadow: none; margin-bottom: 1rem; }
+            @page { margin: 1.5cm; } /* Saubere Seitenränder für PDF-Druck */
             
-            /* Standardmäßig beim normalen Listendruck ist das Einzelfeld unsichtbar */
-            #singlePrintArea {
-                display: none;
+            .no-print { display: none !important; }
+            body { background-color: white; color: black; }
+            
+            /* Normaler Druck (gesamte Liste) - Modal verstecken */
+            body:not(.print-modal-mode) #eventModal { 
+                display: none !important; 
+            }
+            body:not(.print-modal-mode) .event-card { 
+                break-inside: avoid; 
+                border: 1px solid #ccc; 
+                box-shadow: none; 
+                margin-bottom: 1rem; 
             }
 
-            /* Wird direkt per Klasse für den mobilen Einzeldruck erzwungen */
-            #singlePrintArea.single-print-visible {
+            /* --- MODAL DRUCKMODUS (Für saubere PDFs) --- */
+            body.print-modal-mode header,
+            body.print-modal-mode #eventList {
+                display: none !important;
+            }
+            
+            body.print-modal-mode #eventModal {
+                position: static !important;
+                background: white !important;
                 display: block !important;
-                padding: 10px;
-                font-family: Arial, sans-serif;
-                color: black;
+                overflow: visible !important;
+                padding: 0 !important;
+            }
+            
+            body.print-modal-mode #eventModal > div {
+                box-shadow: none !important;
+                width: 100% !important;
+                max-width: none !important;
+                max-height: none !important;
+                overflow: visible !important;
+                border: none !important;
+                border-radius: 0 !important;
             }
 
-            /* Design für den Einzeldruck-Beleg */
-            .print-header-box {
-                border-bottom: 3px solid #4f46e5;
-                padding-bottom: 10px;
-                margin-bottom: 25px;
-                display: flex;
-                justify-content: space-between;
-                align-items: flex-end;
+            body.print-modal-mode .modal-no-print { 
+                display: none !important; 
             }
-            .print-title { font-size: 22px; font-weight: bold; color: #4f46e5; margin: 0; }
-            .print-timestamp { font-size: 12px; color: #475569; }
-            .print-event-name { font-size: 24px; font-weight: bold; margin: 0 0 10px 0; }
-            .print-meta-box {
-                font-size: 15px;
-                margin-bottom: 25px;
-                background-color: #f8fafc;
-                padding: 12px;
-                border: 1px solid #e2e8f0;
-                border-radius: 6px;
+
+            /* Dokumenten-Kopfzeile formatieren */
+            body.print-modal-mode #modalTitle {
+                font-size: 20pt !important;
+                border-bottom: 2px solid #4f46e5 !important;
+                padding-bottom: 8px !important;
+                margin-bottom: 10px !important;
             }
-            .print-table { width: 100%; border-collapse: collapse; margin-top: 20px; border: 1px solid #cbd5e1; font-size: 15px; }
-            .print-table th { padding: 12px 10px; font-weight: bold; text-align: left; background-color: #f1f5f9; border-bottom: 2px solid #4f46e5; border-right: 1px solid #cbd5e1; }
-            .print-table td { padding: 12px 10px; border-bottom: 1px solid #cbd5e1; border-right: 1px solid #cbd5e1; }
+            
+            body.print-modal-mode #modalDateTime {
+                font-size: 14pt !important;
+                color: #333 !important;
+                margin-bottom: 25px !important;
+            }
+            
+            /* Fahrer-Liste formatieren */
+            body.print-modal-mode #driverList { 
+                page-break-inside: auto; 
+                margin-top: 20px !important;
+            }
+            
+            body.print-modal-mode #driverList > div { 
+                page-break-inside: avoid; /* Verhindert das Zerschneiden von Boxen am Seitenende */
+                border: 1px solid #aaa !important; 
+                box-shadow: none !important; 
+                margin-bottom: 15px !important;
+                padding: 15px !important;
+                background-color: #f8fafc !important; 
+                -webkit-print-color-adjust: exact; /* Erhält die Hintergrundfarbe beim Druck */
+            }
+
+            body.print-modal-mode #driverList .font-bold {
+                font-size: 14pt !important;
+                margin-bottom: 5px !important;
+            }
+
+            body.print-modal-mode #driverList .text-xs {
+                font-size: 12pt !important;
+            }
         }
     </style>
 </head>
@@ -101,78 +130,96 @@
         </div>
     </header>
 
-    <main id="eventList" class="p-4 max-w-3xl mx-auto space-y-4"></main>
+    <main id="eventList" class="p-4 max-w-3xl mx-auto space-y-4">
+    </main>
 
-    <div id="singlePrintArea"></div>
-
-    <div id="eventModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex justify-center items-end sm:items-center no-print">
+    <div id="eventModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex justify-center items-end sm:items-center">
         <div class="bg-white w-full sm:max-w-lg rounded-t-2xl sm:rounded-2xl max-h-[90vh] overflow-y-auto flex flex-col">
-            
             <div class="p-4 border-b flex justify-between items-center sticky top-0 bg-white rounded-t-2xl z-10">
                 <h2 id="modalTitle" class="font-bold text-lg truncate pr-2">Event</h2>
-                <button onclick="closeModal()" class="text-slate-500 text-2xl px-2">&times;</button>
+                <div class="flex items-center space-x-4 modal-no-print">
+                    <button id="modalPrintBtn" onclick="printModal()" class="text-indigo-600 hover:text-indigo-800 hidden" title="Veranstaltung drucken">
+                        <i class="fa-solid fa-print text-xl"></i>
+                    </button>
+                    <button onclick="closeModal()" class="text-slate-500 hover:text-slate-700 text-3xl leading-none">&times;</button>
+                </div>
             </div>
             
             <div class="p-4 flex-grow">
-                <p class="text-sm text-slate-500 mb-4" id="modalDateTime"></p>
+                <p class="text-sm text-slate-500 mb-4 font-medium" id="modalDateTime"></p>
 
-                <div id="driverList" class="space-y-3 mb-4"></div>
+                <div id="driverList" class="space-y-3 mb-6"></div>
 
-                <div id="modalPrintContainer" class="hidden mb-6">
-                    <button onclick="printEvent(currentEventId, event)" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 px-4 rounded-xl transition flex items-center justify-center gap-2 shadow-sm">
-                        <i class="fa-solid fa-print"></i> Diese Veranstaltung einzeln drucken
-                    </button>
-                </div>
+                <div class="modal-no-print">
+                    <hr class="my-4 border-slate-200">
+                    <h3 class="font-semibold text-indigo-600 mb-3"><i class="fa-solid fa-user-plus mr-1"></i> Weiteren Fahrer hinzufügen</h3>
+                    <div class="space-y-3 bg-slate-50 p-3 rounded-lg border">
+                        
+                        <select id="driverName" class="w-full p-2 border rounded focus:ring-2 focus:ring-indigo-500 outline-none bg-white">
+                        </select>
+                        
+                        <div class="grid grid-cols-2 gap-2 text-sm">
+                            <label class="flex items-center space-x-2 bg-white p-2 rounded border"><input type="radio" name="duty" value="Hinfahrt" class="text-indigo-600"> <span>Hinfahrt</span></label>
+                            <label class="flex items-center space-x-2 bg-white p-2 rounded border"><input type="radio" name="duty" value="Rückfahrt" class="text-indigo-600"> <span>Rückfahrt</span></label>
+                            <label class="flex items-center space-x-2 bg-white p-2 rounded border col-span-2"><input type="radio" name="duty" value="Hin- und Rückfahrt" checked class="text-indigo-600"> <span>Hin- & Rückfahrt</span></label>
+                        </div>
 
-                <hr class="my-4 border-slate-200">
+                        <div class="text-sm font-medium mt-2">Besucht die Veranstaltung?</div>
+                        <div class="flex space-x-4 text-sm">
+                            <label class="flex items-center space-x-2"><input type="radio" name="attends" value="Ja" class="text-indigo-600"> <span>Ja</span></label>
+                            <label class="flex items-center space-x-2"><input type="radio" name="attends" value="Nein" checked class="text-indigo-600"> <span>Nein</span></label>
+                        </div>
 
-                <h3 class="font-semibold text-indigo-600 mb-3"><i class="fa-solid fa-user-plus mr-1"></i> Weiteren Fahrer hinzufügen</h3>
-                <div class="space-y-3 bg-slate-50 p-3 rounded-lg border">
-                    
-                    <select id="driverName" class="w-full p-2 border rounded focus:ring-2 focus:ring-indigo-500 outline-none bg-white">
-                    </select>
-                    
-                    <div class="grid grid-cols-2 gap-2 text-sm">
-                        <label class="flex items-center space-x-2 bg-white p-2 rounded border"><input type="radio" name="duty" value="Hinfahrt" class="text-indigo-600"> <span>Hinfahrt</span></label>
-                        <label class="flex items-center space-x-2 bg-white p-2 rounded border"><input type="radio" name="duty" value="Rückfahrt" class="text-indigo-600"> <span>Rückfahrt</span></label>
-                        <label class="flex items-center space-x-2 bg-white p-2 rounded border col-span-2"><input type="radio" name="duty" value="Hin- und Rückfahrt" checked class="text-indigo-600"> <span>Hin- & Rückfahrt</span></label>
+                        <div class="flex space-x-2 text-sm mt-2">
+                            <input type="time" id="endTime" class="w-full p-2 border rounded" title="Gibt das Ende der Veranstaltung an">
+                            <span class="text-xs text-slate-500 self-center">Endzeit eintragen (optional)</span>
+                        </div>
+
+                        <button onclick="addDriver()" class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded mt-2 transition">
+                            Fahrer speichern & hinzufügen
+                        </button>
                     </div>
-
-                    <div class="text-sm font-medium mt-2">Besucht die Veranstaltung?</div>
-                    <div class="flex space-x-4 text-sm">
-                        <label class="flex items-center space-x-2"><input type="radio" name="attends" value="Ja" class="text-indigo-600"> <span>Ja</span></label>
-                        <label class="flex items-center space-x-2"><input type="radio" name="attends" value="Nein" checked class="text-indigo-600"> <span>Nein</span></label>
-                    </div>
-
-                    <div class="flex space-x-2 text-sm mt-2">
-                        <input type="time" id="endTime" class="w-full p-2 border rounded" title="Gibt das Ende der Veranstaltung an">
-                        <span class="text-xs text-slate-500 self-center">Endzeit eintragen (optional)</span>
-                    </div>
-
-                    <button onclick="addDriver()" class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded mt-2 transition">
-                        Fahrer保存 & hinzufügen
-                    </button>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
-        // ==========================================
-        // 1. KONFIGURATION & STATE
-        // ==========================================
         const fahrerNamen = [
-            "Marco Pfeiffer", "Michaela Lüders", "Michael Lüders", 
-            "Kevin Gawe", "Tommy Wall", "Nicole Ritzrau", 
-            "Kimberley", "Uwe Busse", "Thomas Kaufmann"
+            "Marco Pfeiffer", 
+            "Michaela Lüders", 
+            "Michael Lüders", 
+            "Kevin Gawe", 
+            "Tommy Wall", 
+            "Nicole Ritzrau", 
+            "Kimberley", 
+            "Uwe Busse", 
+            "Thomas Kaufmann"
         ];
 
         let events = JSON.parse(localStorage.getItem('bergtheater_events')) || [];
         let currentEventId = null;
 
-        // ==========================================
-        // 2. INITIALISIERUNG
-        // ==========================================
+        function formatExcelDate(excelDate) {
+            const num = Number(excelDate);
+            if (!isNaN(num) && num > 30000 && num < 70000) {
+                const date = new Date(Math.round((num - 25569) * 86400 * 1000));
+                return date.toLocaleDateString('de-DE', {day: '2-digit', month: '2-digit', year: 'numeric'});
+            }
+            return excelDate; 
+        }
+
+        function getWochentag(datumString) {
+            if (!datumString) return '';
+            const parts = datumString.split('.');
+            if (parts.length === 3) {
+                const dateObj = new Date(parts[2], parts[1] - 1, parts[0]);
+                const tage = ['So.', 'Mo.', 'Di.', 'Mi.', 'Do.', 'Fr.', 'Sa.'];
+                return tage[dateObj.getDay()];
+            }
+            return '';
+        }
+
         window.onload = () => {
             initDropdown();
             
@@ -203,9 +250,21 @@
             select.innerHTML = optionsHTML;
         }
 
-        // ==========================================
-        // 3. RENDERING (Benutzeroberfläche)
-        // ==========================================
+        function cleanUpOldEvents() {
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            events = events.filter(ev => {
+                const parts = ev.datum.split('.'); 
+                if(parts.length === 3) {
+                    const eventDate = new Date(parts[2], parts[1] - 1, parts[0]);
+                    return eventDate >= today; 
+                }
+                return true; 
+            });
+            saveData();
+        }
+
         function renderEvents() {
             const container = document.getElementById('eventList');
             container.innerHTML = '';
@@ -221,23 +280,24 @@
             });
 
             events.forEach(ev => {
-                const hasDrivers = ev.drivers && ev.drivers.length > 0;
-                
-                const driverNames = hasDrivers 
+                const driverNames = ev.drivers && ev.drivers.length > 0 
                     ? ev.drivers.map(d => `<span class="bg-indigo-100 text-indigo-800 text-xs px-2 py-1 rounded inline-block mr-1 mb-1"><i class="fa-solid fa-user mr-1"></i>${d.name}</span>`).join('') 
                     : '<span class="text-slate-400 text-xs italic">Noch keine Fahrer eingeteilt</span>';
 
-                const printIconBtn = hasDrivers 
-                    ? `<button onclick="printEvent('${ev.id}', event)" class="text-indigo-500 hover:text-indigo-700 px-2 no-print" title="Diese Veranstaltung einzeln drucken"><i class="fa-solid fa-print"></i></button>`
-                    : '';
-
                 let uhrzeitAnzeige = ev.uhrzeit ? String(ev.uhrzeit) : "";
-                if (uhrzeitAnzeige && !uhrzeitAnzeige.includes('Uhr')) uhrzeitAnzeige += ' Uhr';
+                if (uhrzeitAnzeige && !uhrzeitAnzeige.includes('Uhr')) {
+                    uhrzeitAnzeige += ' Uhr';
+                }
                 if (ev.endTime) {
                     let endZeit = String(ev.endTime);
-                    if (!endZeit.includes('Uhr')) endZeit += ' Uhr';
+                    if (!endZeit.includes('Uhr')) {
+                        endZeit += ' Uhr';
+                    }
                     uhrzeitAnzeige += ` - ${endZeit}`;
                 }
+
+                const wochentag = getWochentag(ev.datum);
+                const datumAnzeige = wochentag ? `${wochentag} ${ev.datum}` : ev.datum;
 
                 const card = document.createElement('div');
                 card.className = "event-card bg-white p-4 rounded-xl shadow-sm border border-slate-200 cursor-pointer hover:border-indigo-400 transition";
@@ -245,13 +305,10 @@
                 card.innerHTML = `
                     <div class="flex justify-between items-start mb-2">
                         <h3 class="font-bold text-lg leading-tight text-slate-800">${ev.name}</h3>
-                        <div class="flex space-x-1 no-print">
-                            ${printIconBtn}
-                            <button onclick="deleteEvent('${ev.id}', event)" class="text-red-400 hover:text-red-600 px-2"><i class="fa-solid fa-trash-can"></i></button>
-                        </div>
+                        <button onclick="deleteEvent('${ev.id}', event)" class="text-red-400 hover:text-red-600 px-2 no-print"><i class="fa-solid fa-trash-can"></i></button>
                     </div>
                     <div class="text-sm text-slate-600 mb-3 font-medium">
-                        <i class="fa-regular fa-calendar text-indigo-500 mr-1"></i> ${ev.datum} | 
+                        <i class="fa-regular fa-calendar text-indigo-500 mr-1"></i> ${datumAnzeige} | 
                         <i class="fa-regular fa-clock text-indigo-500 mr-1"></i> ${uhrzeitAnzeige}
                     </div>
                     <div class="border-t pt-3 mt-2">
@@ -262,54 +319,44 @@
             });
         }
 
-        function renderDriverList(ev) {
-            const container = document.getElementById('driverList');
-            container.innerHTML = '';
-
-            if(!ev.drivers || ev.drivers.length === 0) return;
-
-            ev.drivers.forEach((d, index) => {
-                const div = document.createElement('div');
-                div.className = "bg-white border rounded-lg p-3 flex flex-col sm:flex-row justify-between items-start sm:items-center shadow-sm";
-                div.innerHTML = `
-                    <div class="mb-2 sm:mb-0">
-                        <div class="font-bold text-slate-800">${d.name}</div>
-                        <div class="text-xs text-slate-500">
-                            Fahrt: <b>${d.duty}</b> | Besuch: <b>${d.attends}</b>
-                        </div>
-                    </div>
-                    <div class="flex space-x-2 w-full sm:w-auto">
-                        <button onclick="shareDriverInfo(${index})" class="flex-1 sm:flex-none bg-blue-500 text-white p-2 rounded text-sm hover:bg-blue-600 transition"><i class="fa-solid fa-share-nodes mr-1"></i> Teilen</button>
-                        <button onclick="removeDriver(${index})" class="bg-red-100 text-red-600 p-2 rounded text-sm hover:bg-red-200 transition"><i class="fa-solid fa-trash"></i></button>
-                    </div>
-                `;
-                container.appendChild(div);
-            });
+        function deleteEvent(id, e) {
+            e.stopPropagation(); 
+            if(confirm("Veranstaltung wirklich löschen?")) {
+                events = events.filter(ev => ev.id !== id);
+                saveData();
+                renderEvents();
+            }
         }
 
-        // ==========================================
-        // 4. MODAL STEUERUNG
-        // ==========================================
+        function deleteAllEvents() {
+            if(confirm("Möchtest du WIRKLICH ALLE Veranstaltungen löschen? Dies kann nicht rückgängig gemacht werden!")) {
+                events = [];
+                saveData();
+                renderEvents();
+            }
+        }
+
         function openModal(id) {
             currentEventId = id;
             const ev = events.find(e => e.id === id);
             
             let modalUhrzeit = ev.uhrzeit ? String(ev.uhrzeit) : "";
             if (modalUhrzeit && !modalUhrzeit.includes('Uhr')) modalUhrzeit += ' Uhr';
+            
             if (ev.endTime) {
                 let endZeitModal = String(ev.endTime);
-                if (!endZeitModal.includes('Uhr')) endZeitModal += ' Uhr';
+                if (!endZeitModal.includes('Uhr')) {
+                    endZeitModal += ' Uhr';
+                }
                 modalUhrzeit += ` - ${endZeitModal}`;
             }
 
-            document.getElementById('modalTitle').innerText = ev.name;
-            document.getElementById('modalDateTime').innerText = `${ev.datum} ab ${modalUhrzeit}`;
-            
-            const printContainer = document.getElementById('modalPrintContainer');
-            if (printContainer) {
-                printContainer.classList.toggle('hidden', !(ev.drivers && ev.drivers.length > 0));
-            }
+            const wochentag = getWochentag(ev.datum);
+            const datumAnzeige = wochentag ? `${wochentag} ${ev.datum}` : ev.datum;
 
+            document.getElementById('modalTitle').innerText = ev.name;
+            document.getElementById('modalDateTime').innerText = `${datumAnzeige} ab ${modalUhrzeit}`;
+            
             document.getElementById('driverName').value = '';
             document.getElementById('endTime').value = ev.endTime || '';
             document.querySelector('input[name="duty"][value="Hin- und Rückfahrt"]').checked = true;
@@ -324,9 +371,51 @@
             currentEventId = null;
         }
 
-        // ==========================================
-        // 5. FAHRER VERWALTUNG
-        // ==========================================
+        function printModal() {
+            document.body.classList.add('print-modal-mode');
+            window.print();
+            
+            // SetTimeout stellt sicher, dass das Layout nach dem Schließen 
+            // des Druckdialogs wieder in den Normalzustand zurückkehrt
+            setTimeout(() => {
+                document.body.classList.remove('print-modal-mode');
+            }, 500);
+        }
+
+        function renderDriverList(ev) {
+            const container = document.getElementById('driverList');
+            const printBtn = document.getElementById('modalPrintBtn');
+            
+            container.innerHTML = '';
+
+            // Wenn keine Fahrer da sind: Liste leeren, Druck-Button ausblenden und abbrechen
+            if(!ev.drivers || ev.drivers.length === 0) {
+                if(printBtn) printBtn.classList.add('hidden');
+                return;
+            }
+
+            // Wenn Fahrer da sind: Druck-Button einblenden
+            if(printBtn) printBtn.classList.remove('hidden');
+
+            ev.drivers.forEach((d, index) => {
+                const div = document.createElement('div');
+                div.className = "bg-white border rounded-lg p-3 flex flex-col sm:flex-row justify-between items-start sm:items-center shadow-sm";
+                div.innerHTML = `
+                    <div class="mb-2 sm:mb-0">
+                        <div class="font-bold text-slate-800">${d.name}</div>
+                        <div class="text-xs text-slate-500 mt-1">
+                            Fahrt: <b class="text-slate-700">${d.duty}</b> &nbsp;|&nbsp; Besuch: <b class="text-slate-700">${d.attends}</b>
+                        </div>
+                    </div>
+                    <div class="flex space-x-2 w-full sm:w-auto modal-no-print">
+                        <button onclick="shareDriverInfo(${index})" class="flex-1 sm:flex-none bg-blue-500 text-white p-2 rounded text-sm hover:bg-blue-600 transition"><i class="fa-solid fa-share-nodes mr-1"></i> Teilen</button>
+                        <button onclick="removeDriver(${index})" class="bg-red-100 text-red-600 p-2 rounded text-sm hover:bg-red-200 transition"><i class="fa-solid fa-trash"></i></button>
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+        }
+
         function addDriver() {
             const name = document.getElementById('driverName').value;
             if(!name) { alert("Bitte einen Fahrer aus der Liste auswählen."); return; }
@@ -347,8 +436,6 @@
             renderEvents(); 
 
             document.getElementById('driverName').value = '';
-            closeModal();
-            openModal(currentEventId); 
         }
 
         function removeDriver(index) {
@@ -357,11 +444,6 @@
             saveData();
             renderDriverList(ev);
             renderEvents();
-            
-            const printContainer = document.getElementById('modalPrintContainer');
-            if (printContainer) {
-                printContainer.classList.toggle('hidden', !ev.drivers || ev.drivers.length === 0);
-            }
         }
 
         function shareDriverInfo(driverIndex) {
@@ -374,158 +456,33 @@
             let endeText = "Ende: nach Rücksprache";
             if (ev.endTime) {
                 let endZeitShare = String(ev.endTime);
-                if (!endZeitShare.includes('Uhr')) endZeitShare += ' Uhr';
+                if (!endZeitShare.includes('Uhr')) {
+                    endZeitShare += ' Uhr';
+                }
                 endeText = `Ende ca.: ${endZeitShare}`;
             }
 
-            const text = `Hallo ${d.name},\nhier sind deine Einsatzdaten für das Bergtheater:\n\nVeranstaltung: ${ev.name}\nDatum: ${ev.datum}\nBeginn: ${startZeit}\n${endeText}\n\nDein Dienst: ${d.duty}\nBesuch der Veranstaltung: ${d.attends}\n\nBitte bestätigen. Danke!`;
+            const wochentag = getWochentag(ev.datum);
+            const datumAnzeige = wochentag ? `${wochentag} ${ev.datum}` : ev.datum;
+
+            const text = `Hallo ${d.name},\nhier sind deine Einsatzdaten für das Bergtheater:\n\nVeranstaltung: ${ev.name}\nDatum: ${datumAnzeige}\nBeginn: ${startZeit}\n${endeText}\n\nDein Dienst: ${d.duty}\nBesuch der Veranstaltung: ${d.attends}\n\nBitte bestätigen. Danke!`;
 
             if (navigator.share) {
-                navigator.share({ title: 'Fahrer-Einteilung Bergtheater', text: text }).catch(console.error);
+                navigator.share({
+                    title: 'Fahrer-Einteilung Bergtheater',
+                    text: text
+                }).catch(console.error);
             } else {
                 prompt("Dein Gerät unterstützt kein direktes Teilen. Bitte kopiere diesen Text:", text);
             }
         }
 
-        // ==========================================
-        // 6. EVENT VERWALTUNG
-        // ==========================================
-        function deleteEvent(id, e) {
-            e.stopPropagation(); 
-            if(confirm("Veranstaltung wirklich löschen?")) {
-                events = events.filter(ev => ev.id !== id);
-                saveData();
-                renderEvents();
-            }
-        }
-
-        function deleteAllEvents() {
-            if(confirm("Möchtest du WIRKLICH ALLE Veranstaltungen löschen? Dies kann nicht rückgängig gemacht werden!")) {
-                events = [];
-                saveData();
-                renderEvents();
-            }
-        }
-
-        function cleanUpOldEvents() {
-            const today = new Date();
-            today.setHours(0, 0, 0, 0);
-
-            events = events.filter(ev => {
-                const parts = ev.datum.split('.'); 
-                if(parts.length === 3) {
-                    const eventDate = new Date(parts[2], parts[1] - 1, parts[0]);
-                    return eventDate >= today; 
-                }
-                return true; 
-            });
-            saveData();
-        }
-
-        // ==========================================
-        // 7. DRUCK FUNKTIONEN (Direkte Utility-Steuerung für Handys)
-        // ==========================================
-        function printEvent(id, e) {
-            if(e) e.stopPropagation(); 
-            const ev = events.find(evnt => evnt.id === id);
-            if(!ev) return;
-            
-            let uhrzeitAnzeige = ev.uhrzeit ? String(ev.uhrzeit) : "";
-            if (uhrzeitAnzeige && !uhrzeitAnzeige.includes('Uhr')) uhrzeitAnzeige += ' Uhr';
-            if (ev.endTime) {
-                let endZeit = String(ev.endTime);
-                if (!endZeit.includes('Uhr')) endZeit += ' Uhr';
-                uhrzeitAnzeige += ` - ${endZeit}`;
-            }
-
-            let driversHTML = '';
-            if(ev.drivers && ev.drivers.length > 0) {
-                driversHTML = `
-                    <table class="print-table">
-                        <thead>
-                            <tr>
-                                <th>Fahrer</th>
-                                <th>Dienst</th>
-                                <th>Besucht Veranstaltung?</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                `;
-                ev.drivers.forEach(d => {
-                    const safeDuty = d.duty.replace(/ü/g, '&uuml;').replace(/ö/g, '&ouml;').replace(/ä/g, '&auml;');
-                    driversHTML += `
-                        <tr>
-                            <td><strong>${d.name}</strong></td>
-                            <td>${safeDuty}</td>
-                            <td>${d.attends}</td>
-                        </tr>
-                    `;
-                });
-                driversHTML += `</tbody></table>`;
-            }
-
-            const printArea = document.getElementById('singlePrintArea');
-            printArea.innerHTML = `
-                <div class="print-header-box">
-                    <h1 class="print-title"><i class="fa-solid fa-van-shuttle"></i> Fahrer-Planung Bergtheater</h1>
-                    <span class="print-timestamp">Ausgedruckt am: ${new Date().toLocaleDateString('de-DE')} um ${new Date().toLocaleTimeString('de-DE', {hour: '2-digit', minute:'2-digit'})} Uhr</span>
-                </div>
-                
-                <h2 class="print-event-name">${ev.name}</h2>
-                
-                <div class="print-meta-box">
-                    <strong>Datum:</strong> ${ev.datum} &nbsp;&nbsp;|&nbsp;&nbsp; <strong>Zeit:</strong> ${uhrzeitAnzeige}
-                </div>
-                
-                <h3 style="font-size: 16px; font-weight: bold; margin: 0 0 10px 0; color: #4f46e5;">Eingeteiltes Personal:</h3>
-                ${driversHTML}
-            `;
-            
-            // DIE RETTUNG FÜR SMARTPHONES: 
-            // Wir verstecken die Hauptliste direkt über die existierende 'no-print' Klasse...
-            document.getElementById('eventList').classList.add('no-print');
-            
-            // ...und zwingen das Einzelfeld zur Anzeige
-            printArea.classList.add('single-print-visible');
-            
-            // Dem mobilen UI-Thread eine kurze Pause geben, um das Layout neu zu berechnen
-            setTimeout(() => {
-                window.print();
-            }, 300);
-        }
-
-        // Sobald das Druckfenster (auch am Handy) schließt oder abgebrochen wird, 
-        // setzen wir alles sofort wieder zurück
-        window.addEventListener('afterprint', () => {
-            const eventList = document.getElementById('eventList');
-            if (eventList) {
-                eventList.classList.remove('no-print');
-            }
-            const printArea = document.getElementById('singlePrintArea');
-            if (printArea) {
-                printArea.classList.remove('single-print-visible');
-                printArea.innerHTML = '';
-            }
-        });
-
-        // ==========================================
-        // 8. DATEN & BACKUP (Excel/JSON)
-        // ==========================================
         function saveData() {
             localStorage.setItem('bergtheater_events', JSON.stringify(events));
         }
 
         function generateId() {
             return Math.random().toString(36).substr(2, 9);
-        }
-
-        function formatExcelDate(excelDate) {
-            const num = Number(excelDate);
-            if (!isNaN(num) && num > 30000 && num < 70000) {
-                const date = new Date(Math.round((num - 25569) * 86400 * 1000));
-                return date.toLocaleDateString('de-DE', {day: '2-digit', month: '2-digit', year: 'numeric'});
-            }
-            return excelDate; 
         }
 
         function handleExcelImport(e) {
@@ -537,6 +494,7 @@
                 const data = new Uint8Array(e.target.result);
                 const workbook = XLSX.read(data, {type: 'array'});
                 const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+                
                 const jsonData = XLSX.utils.sheet_to_json(firstSheet, {header: 1, raw: false});
 
                 let importedCount = 0;
