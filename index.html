@@ -17,8 +17,17 @@
             .no-print { display: none !important; }
             body { background-color: white; }
             .event-card { break-inside: avoid; border: 1px solid #ccc; box-shadow: none; margin-bottom: 1rem; }
+            
+            /* Steuerung für den Einzeldruck */
+            body.print-single-mode > *:not(#singlePrintArea) {
+                display: none !important;
+            }
+            body.print-single-mode #singlePrintArea {
+                display: block !important;
+            }
         }
         body { -webkit-tap-highlight-color: transparent; }
+        #singlePrintArea { display: none; }
     </style>
 </head>
 <body class="bg-slate-100 text-slate-800 font-sans pb-20">
@@ -56,7 +65,12 @@
     <div id="eventModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex justify-center items-end sm:items-center no-print">
         <div class="bg-white w-full sm:max-w-lg rounded-t-2xl sm:rounded-2xl max-h-[90vh] overflow-y-auto flex flex-col">
             <div class="p-4 border-b flex justify-between items-center sticky top-0 bg-white rounded-t-2xl z-10">
-                <h2 id="modalTitle" class="font-bold text-lg truncate pr-2">Event</h2>
+                <div class="flex items-center space-x-2 truncate pr-2">
+                    <h2 id="modalTitle" class="font-bold text-lg truncate">Event</h2>
+                    <button id="modalPrintBtn" onclick="printEvent(currentEventId)" class="text-indigo-500 hover:text-indigo-700 px-2 hidden" title="Diese Veranstaltung drucken">
+                        <i class="fa-solid fa-print text-lg"></i>
+                    </button>
+                </div>
                 <button onclick="closeModal()" class="text-slate-500 text-2xl px-2">&times;</button>
             </div>
             
@@ -123,7 +137,6 @@
             return excelDate; 
         }
 
-        // Neue Funktion zur Ermittlung des Wochentags
         function getWochentag(datumString) {
             if (!datumString) return '';
             const parts = datumString.split('.');
@@ -138,7 +151,6 @@
         window.onload = () => {
             initDropdown();
             
-            // --- Service Worker Registrierung ---
             if ('serviceWorker' in navigator) {
                 navigator.serviceWorker.register('./sw.js')
                     .then(() => console.log('Service Worker registriert'))
@@ -196,9 +208,16 @@
             });
 
             events.forEach(ev => {
-                const driverNames = ev.drivers && ev.drivers.length > 0 
+                const hasDrivers = ev.drivers && ev.drivers.length > 0;
+                
+                const driverNames = hasDrivers 
                     ? ev.drivers.map(d => `<span class="bg-indigo-100 text-indigo-800 text-xs px-2 py-1 rounded inline-block mr-1 mb-1"><i class="fa-solid fa-user mr-1"></i>${d.name}</span>`).join('') 
                     : '<span class="text-slate-400 text-xs italic">Noch keine Fahrer eingeteilt</span>';
+
+                // Print-Button nur erzeugen, wenn Fahrer vorhanden sind
+                const printButton = hasDrivers 
+                    ? `<button onclick="printEvent('${ev.id}', event)" class="text-indigo-500 hover:text-indigo-700 px-2 no-print" title="Diese Veranstaltung einzeln drucken"><i class="fa-solid fa-print"></i></button>`
+                    : '';
 
                 let uhrzeitAnzeige = ev.uhrzeit ? String(ev.uhrzeit) : "";
                 if (uhrzeitAnzeige && !uhrzeitAnzeige.includes('Uhr')) {
@@ -212,7 +231,6 @@
                     uhrzeitAnzeige += ` - ${endZeit}`;
                 }
 
-                // Wochentag ermitteln und Datum zusammensetzen
                 const wochentag = getWochentag(ev.datum);
                 const datumAnzeige = wochentag ? `${wochentag} ${ev.datum}` : ev.datum;
 
@@ -222,7 +240,10 @@
                 card.innerHTML = `
                     <div class="flex justify-between items-start mb-2">
                         <h3 class="font-bold text-lg leading-tight text-slate-800">${ev.name}</h3>
-                        <button onclick="deleteEvent('${ev.id}', event)" class="text-red-400 hover:text-red-600 px-2 no-print"><i class="fa-solid fa-trash-can"></i></button>
+                        <div class="flex space-x-1 no-print">
+                            ${printButton}
+                            <button onclick="deleteEvent('${ev.id}', event)" class="text-red-400 hover:text-red-600 px-2"><i class="fa-solid fa-trash-can"></i></button>
+                        </div>
                     </div>
                     <div class="text-sm text-slate-600 mb-3 font-medium">
                         <i class="fa-regular fa-calendar text-indigo-500 mr-1"></i> ${datumAnzeige} | 
@@ -268,13 +289,20 @@
                 modalUhrzeit += ` - ${endZeitModal}`;
             }
 
-            // Wochentag auch im Modal anzeigen
             const wochentag = getWochentag(ev.datum);
             const datumAnzeige = wochentag ? `${wochentag} ${ev.datum}` : ev.datum;
 
             document.getElementById('modalTitle').innerText = ev.name;
             document.getElementById('modalDateTime').innerText = `${datumAnzeige} ab ${modalUhrzeit}`;
             
+            // Sichtbarkeit des Print-Buttons im Modal steuern
+            const modalPrintBtn = document.getElementById('modalPrintBtn');
+            if (ev.drivers && ev.drivers.length > 0) {
+                modalPrintBtn.classList.remove('hidden');
+            } else {
+                modalPrintBtn.classList.add('hidden');
+            }
+
             document.getElementById('driverName').value = '';
             document.getElementById('endTime').value = ev.endTime || '';
             document.querySelector('input[name="duty"][value="Hin- und Rückfahrt"]').checked = true;
@@ -362,7 +390,6 @@
                 endeText = `Ende ca.: ${endZeitShare}`;
             }
 
-            // Wochentag auch im Textfeld fürs Teilen hinzufügen
             const wochentag = getWochentag(ev.datum);
             const datumAnzeige = wochentag ? `${wochentag} ${ev.datum}` : ev.datum;
 
@@ -376,6 +403,75 @@
             } else {
                 prompt("Dein Gerät unterstützt kein direktes Teilen. Bitte kopiere diesen Text:", text);
             }
+        }
+
+        // Funktion für den Einzeldruck einer Veranstaltung
+        function printEvent(id, e) {
+            if(e) e.stopPropagation(); 
+            const ev = events.find(evnt => evnt.id === id);
+            if(!ev) return;
+            
+            let uhrzeitAnzeige = ev.uhrzeit ? String(ev.uhrzeit) : "";
+            if (uhrzeitAnzeige && !uhrzeitAnzeige.includes('Uhr')) uhrzeitAnzeige += ' Uhr';
+            if (ev.endTime) {
+                let endZeit = String(ev.endTime);
+                if (!endZeit.includes('Uhr')) endZeit += ' Uhr';
+                uhrzeitAnzeige += ` - ${endZeit}`;
+            }
+            const wochentag = getWochentag(ev.datum);
+            const datumAnzeige = wochentag ? `${wochentag} ${ev.datum}` : ev.datum;
+
+            let driversHTML = '';
+            if(ev.drivers && ev.drivers.length > 0) {
+                driversHTML = `
+                    <table style="width:100%; border-collapse: collapse; margin-top: 20px; font-family: sans-serif; font-size: 14px;">
+                        <thead>
+                            <tr style="border-bottom: 2px solid #4f46e5; text-align: left; background-color: #f8fafc;">
+                                <th style="padding: 10px; font-weight: bold; color: #1e293b;">Fahrer</th>
+                                <th style="padding: 10px; font-weight: bold; color: #1e293b;">Dienst</th>
+                                <th style="padding: 10px; font-weight: bold; color: #1e293b;">Besucht Veranstaltung</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                `;
+                ev.drivers.forEach(d => {
+                    driversHTML += `
+                        <tr style="border-bottom: 1px solid #e2e8f0;">
+                            <td style="padding: 12px 10px; font-weight: bold; color: #0f172a;">${d.name}</td>
+                            <td style="padding: 12px 10px; color: #334155;">${d.duty}</td>
+                            <td style="padding: 12px 10px; color: #334155;">${d.attends}</td>
+                        </tr>
+                    `;
+                });
+                driversHTML += `</tbody></table>`;
+            }
+
+            let printArea = document.getElementById('singlePrintArea');
+            if(!printArea) {
+                printArea = document.createElement('div');
+                printArea.id = 'singlePrintArea';
+                document.body.appendChild(printArea);
+            }
+            
+            printArea.innerHTML = `
+                <div style="padding: 10px; font-family: sans-serif;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #e2e8f0; padding-bottom: 12px; margin-bottom: 20px;">
+                        <h1 style="font-size: 20px; font-weight: bold; color: #1e293b; margin: 0;">
+                            <i class="fa-solid fa-van-shuttle" style="color: #4f46e5;"></i> Bergtheater Fahrer-Planer
+                        </h1>
+                        <span style="font-size: 12px; color: #64748b;">Ausdruck vom ${new Date().toLocaleDateString('de-DE')}</span>
+                    </div>
+                    <h2 style="font-size: 22px; font-weight: bold; color: #4f46e5; margin: 0 0 8px 0;">${ev.name}</h2>
+                    <div style="font-size: 14px; color: #475569; margin-bottom: 20px; background-color: #f1f5f9; padding: 10px; border-radius: 6px;">
+                        <strong>Datum:</strong> ${datumAnzeige} &nbsp;&nbsp;|&nbsp;&nbsp; <strong>Zeit:</strong> ${uhrzeitAnzeige}
+                    </div>
+                    ${driversHTML}
+                </div>
+            `;
+            
+            document.body.classList.add('print-single-mode');
+            window.print();
+            document.body.classList.remove('print-single-mode');
         }
 
         function saveData() {
