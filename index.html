@@ -41,7 +41,7 @@
             <input type="file" id="backupUpload" accept=".json, application/json, text/plain, */*" class="hidden" onchange="handleBackupImport(event)">
 
             <button onclick="deleteAllEvents()" class="bg-red-500 hover:bg-red-400 p-2 rounded flex flex-col items-center justify-center transition">
-                <i class="fa-solid fa-trash-can text-lg mb-1"></i> <span class="text-center">Alle<br>Löschen</span>
+                <i class="fa-solid fa-trash-can text-lg mb-1"></i> <span class="text-center">Alle<br>LÃ¶schen</span>
             </button>
 
             <button onclick="window.print()" class="bg-indigo-500 hover:bg-indigo-400 p-2 rounded flex flex-col items-center justify-center transition">
@@ -67,7 +67,7 @@
 
                 <hr class="my-4 border-slate-200">
 
-                <h3 class="font-semibold text-indigo-600 mb-3"><i class="fa-solid fa-user-plus mr-1"></i> Weiteren Fahrer hinzufügen</h3>
+                <h3 class="font-semibold text-indigo-600 mb-3"><i class="fa-solid fa-user-plus mr-1"></i> Weiteren Fahrer hinzufÃ¼gen</h3>
                 <div class="space-y-3 bg-slate-50 p-3 rounded-lg border">
                     
                     <select id="driverName" class="w-full p-2 border rounded focus:ring-2 focus:ring-indigo-500 outline-none bg-white">
@@ -75,8 +75,8 @@
                     
                     <div class="grid grid-cols-2 gap-2 text-sm">
                         <label class="flex items-center space-x-2 bg-white p-2 rounded border"><input type="radio" name="duty" value="Hinfahrt" class="text-indigo-600"> <span>Hinfahrt</span></label>
-                        <label class="flex items-center space-x-2 bg-white p-2 rounded border"><input type="radio" name="duty" value="Rückfahrt" class="text-indigo-600"> <span>Rückfahrt</span></label>
-                        <label class="flex items-center space-x-2 bg-white p-2 rounded border col-span-2"><input type="radio" name="duty" value="Hin- und Rückfahrt" checked class="text-indigo-600"> <span>Hin- & Rückfahrt</span></label>
+                        <label class="flex items-center space-x-2 bg-white p-2 rounded border"><input type="radio" name="duty" value="RÃ¼ckfahrt" class="text-indigo-600"> <span>RÃ¼ckfahrt</span></label>
+                        <label class="flex items-center space-x-2 bg-white p-2 rounded border col-span-2"><input type="radio" name="duty" value="Hin- und RÃ¼ckfahrt" checked class="text-indigo-600"> <span>Hin- & RÃ¼ckfahrt</span></label>
                     </div>
 
                     <div class="text-sm font-medium mt-2">Besucht die Veranstaltung?</div>
@@ -91,7 +91,7 @@
                     </div>
 
                     <button onclick="addDriver()" class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded mt-2 transition">
-                        Fahrer speichern & hinzufügen
+                        Fahrer speichern & hinzufÃ¼gen
                     </button>
                 </div>
             </div>
@@ -101,8 +101,8 @@
     <script>
         const fahrerNamen = [
             "Marco Pfeiffer", 
-            "Michaela Lüders", 
-            "Michael Lüders", 
+            "Michaela LÃ¼ders", 
+            "Michael LÃ¼ders", 
             "Kevin Gawe", 
             "Tommy Wall", 
             "Nicole Ritzrau", 
@@ -147,7 +147,7 @@
 
         function initDropdown() {
             const select = document.getElementById('driverName');
-            let optionsHTML = '<option value="">-- Bitte Fahrer auswählen --</option>';
+            let optionsHTML = '<option value="">-- Bitte Fahrer auswÃ¤hlen --</option>';
             fahrerNamen.sort().forEach(name => {
                 optionsHTML += `<option value="${name}">${name}</option>`;
             });
@@ -222,7 +222,7 @@
 
         function deleteEvent(id, e) {
             e.stopPropagation(); 
-            if(confirm("Veranstaltung wirklich löschen?")) {
+            if(confirm("Veranstaltung wirklich lÃ¶schen?")) {
                 events = events.filter(ev => ev.id !== id);
                 saveData();
                 renderEvents();
@@ -230,7 +230,7 @@
         }
 
         function deleteAllEvents() {
-            if(confirm("Möchtest du WIRKLICH ALLE Veranstaltungen löschen? Dies kann nicht rückgängig gemacht werden!")) {
+            if(confirm("MÃ¶chtest du WIRKLICH ALLE Veranstaltungen lÃ¶schen? Dies kann nicht rÃ¼ckgÃ¤ngig gemacht werden!")) {
                 events = [];
                 saveData();
                 renderEvents();
@@ -257,7 +257,7 @@
             
             document.getElementById('driverName').value = '';
             document.getElementById('endTime').value = ev.endTime || '';
-            document.querySelector('input[name="duty"][value="Hin- und Rückfahrt"]').checked = true;
+            document.querySelector('input[name="duty"][value="Hin- und RÃ¼ckfahrt"]').checked = true;
             document.querySelector('input[name="attends"][value="Nein"]').checked = true;
 
             renderDriverList(ev);
@@ -296,7 +296,7 @@
 
         function addDriver() {
             const name = document.getElementById('driverName').value;
-            if(!name) { alert("Bitte einen Fahrer aus der Liste auswählen."); return; }
+            if(!name) { alert("Bitte einen Fahrer aus der Liste auswÃ¤hlen."); return; }
 
             const duty = document.querySelector('input[name="duty"]:checked').value;
             const attends = document.querySelector('input[name="attends"]:checked').value;
@@ -333,7 +333,7 @@
             let startZeit = ev.uhrzeit ? String(ev.uhrzeit) : "";
             if(startZeit && !startZeit.includes('Uhr')) startZeit += ' Uhr';
             
-            let endeText = "Ende: nach Rücksprache";
+            let endeText = "Ende: nach RÃ¼cksprache";
             if (ev.endTime) {
                 let endZeitShare = String(ev.endTime);
                 if (!endZeitShare.includes('Uhr')) {
@@ -342,7 +342,7 @@
                 endeText = `Ende ca.: ${endZeitShare}`;
             }
 
-            const text = `Hallo ${d.name},\nhier sind deine Einsatzdaten für das Bergtheater:\n\nVeranstaltung: ${ev.name}\nDatum: ${ev.datum}\nBeginn: ${startZeit}\n${endeText}\n\nDein Dienst: ${d.duty}\nBesuch der Veranstaltung: ${d.attends}\n\nBitte bestätigen. Danke!`;
+            const text = `Hallo ${d.name},\nhier sind deine Einsatzdaten fÃ¼r das Bergtheater:\n\nVeranstaltung: ${ev.name}\nDatum: ${ev.datum}\nBeginn: ${startZeit}\n${endeText}\n\nDein Dienst: ${d.duty}\nBesuch der Veranstaltung: ${d.attends}\n\nBitte bestÃ¤tigen. Danke!`;
 
             if (navigator.share) {
                 navigator.share({
@@ -350,7 +350,7 @@
                     text: text
                 }).catch(console.error);
             } else {
-                prompt("Dein Gerät unterstützt kein direktes Teilen. Bitte kopiere diesen Text:", text);
+                prompt("Dein GerÃ¤t unterstÃ¼tzt kein direktes Teilen. Bitte kopiere diesen Text:", text);
             }
         }
 
@@ -396,7 +396,7 @@
                     renderEvents();
                     alert(importedCount + " Veranstaltungen erfolgreich importiert!");
                 } else {
-                    alert("Konnte keine Daten finden. Bitte prüfe, ob deine Tabelle in Spalte A beginnt.");
+                    alert("Konnte keine Daten finden. Bitte prÃ¼fe, ob deine Tabelle in Spalte A beginnt.");
                 }
             };
             reader.readAsArrayBuffer(file);
@@ -431,7 +431,7 @@
                         renderEvents();
                         alert("Backup erfolgreich geladen!");
                     } else {
-                        alert("Ungültige Backup-Datei.");
+                        alert("UngÃ¼ltige Backup-Datei.");
                     }
                 } catch(err) {
                     alert("Fehler beim Lesen der Backup-Datei.");
