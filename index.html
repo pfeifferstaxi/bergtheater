@@ -33,11 +33,17 @@
             body { background-color: white; }
             .event-card { break-inside: avoid; border: 1px solid #ccc; box-shadow: none; margin-bottom: 1rem; }
             
-            /* --- Modus: Einzeldruck einer Veranstaltung --- */
+            /* Wenn die gesamte Liste gedruckt wird, blende den Einzeldruck aus */
+            body:not(.print-single-mode) #singlePrintArea {
+                display: none !important;
+            }
+
+            /* Modus: Einzeldruck (Blendet alles andere radikal aus) */
             body.print-single-mode header,
             body.print-single-mode main,
             body.print-single-mode #eventModal,
-            body.print-single-mode .fixed {
+            body.print-single-mode .fixed,
+            body.print-single-mode #eventList {
                 display: none !important;
             }
             
@@ -48,7 +54,7 @@
                 color: black;
             }
 
-            /* Spezifische Einzeldruck-Klassen (ersetzen die langen Inline-Styles) */
+            /* Design für den Einzeldruck-Beleg */
             .print-header-box {
                 border-bottom: 3px solid #4f46e5;
                 padding-bottom: 10px;
@@ -121,7 +127,7 @@
                 <div id="driverList" class="space-y-3 mb-4"></div>
 
                 <div id="modalPrintContainer" class="hidden mb-6">
-                    <button onclick="printEvent(currentEventId)" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 px-4 rounded-xl transition flex items-center justify-center gap-2 shadow-sm">
+                    <button onclick="printEvent(currentEventId, event)" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 px-4 rounded-xl transition flex items-center justify-center gap-2 shadow-sm">
                         <i class="fa-solid fa-print"></i> Diese Veranstaltung einzeln drucken
                     </button>
                 </div>
@@ -171,6 +177,7 @@
 
         let events = JSON.parse(localStorage.getItem('bergtheater_events')) || [];
         let currentEventId = null;
+        let isSinglePrintMode = false; // Steuert den stabilen Mobil-Druck
 
         // ==========================================
         // 2. INITIALISIERUNG
@@ -184,7 +191,6 @@
                     .catch(err => console.error('Service Worker Fehler:', err));
             }
             
-            // Formatierungs-Korrektur bei Excel-Daten
             events = events.map(ev => {
                 if (ev.datum && !ev.datum.includes('.')) {
                     ev.datum = formatExcelDate(ev.datum);
@@ -218,7 +224,6 @@
                 return;
             }
 
-            // Nach Datum sortieren
             events.sort((a,b) => {
                 const pa = a.datum.split('.'), pb = b.datum.split('.');
                 return new Date(pa[2], pa[1]-1, pa[0]) - new Date(pb[2], pb[1]-1, pb[0]);
@@ -231,12 +236,17 @@
                     ? ev.drivers.map(d => `<span class="bg-indigo-100 text-indigo-800 text-xs px-2 py-1 rounded inline-block mr-1 mb-1"><i class="fa-solid fa-user mr-1"></i>${d.name}</span>`).join('') 
                     : '<span class="text-slate-400 text-xs italic">Noch keine Fahrer eingeteilt</span>';
 
-                const printButton = hasDrivers 
+                const printIconBtn = hasDrivers 
                     ? `<button onclick="printEvent('${ev.id}', event)" class="text-indigo-500 hover:text-indigo-700 px-2 no-print" title="Diese Veranstaltung einzeln drucken"><i class="fa-solid fa-print"></i></button>`
                     : '';
 
-                let uhrzeitAnzeige = formatTimeDisplay(ev.uhrzeit, ev.endTime);
-                const datumAnzeige = getWochentag(ev.datum) ? `${getWochentag(ev.datum)} ${ev.datum}` : ev.datum;
+                let uhrzeitAnzeige = ev.uhrzeit ? String(ev.uhrzeit) : "";
+                if (uhrzeitAnzeige && !uhrzeitAnzeige.includes('Uhr')) uhrzeitAnzeige += ' Uhr';
+                if (ev.endTime) {
+                    let endZeit = String(ev.endTime);
+                    if (!endZeit.includes('Uhr')) endZeit += ' Uhr';
+                    uhrzeitAnzeige += ` - ${endZeit}`;
+                }
 
                 const card = document.createElement('div');
                 card.className = "event-card bg-white p-4 rounded-xl shadow-sm border border-slate-200 cursor-pointer hover:border-indigo-400 transition";
@@ -245,12 +255,12 @@
                     <div class="flex justify-between items-start mb-2">
                         <h3 class="font-bold text-lg leading-tight text-slate-800">${ev.name}</h3>
                         <div class="flex space-x-1 no-print">
-                            ${printButton}
+                            ${printIconBtn}
                             <button onclick="deleteEvent('${ev.id}', event)" class="text-red-400 hover:text-red-600 px-2"><i class="fa-solid fa-trash-can"></i></button>
                         </div>
                     </div>
                     <div class="text-sm text-slate-600 mb-3 font-medium">
-                        <i class="fa-regular fa-calendar text-indigo-500 mr-1"></i> ${datumAnzeige} | 
+                        <i class="fa-regular fa-calendar text-indigo-500 mr-1"></i> ${ev.datum} | 
                         <i class="fa-regular fa-clock text-indigo-500 mr-1"></i> ${uhrzeitAnzeige}
                     </div>
                     <div class="border-t pt-3 mt-2">
@@ -293,17 +303,22 @@
             currentEventId = id;
             const ev = events.find(e => e.id === id);
             
-            const uhrzeitAnzeige = formatTimeDisplay(ev.uhrzeit, ev.endTime);
-            const datumAnzeige = getWochentag(ev.datum) ? `${getWochentag(ev.datum)} ${ev.datum}` : ev.datum;
+            let modalUhrzeit = ev.uhrzeit ? String(ev.uhrzeit) : "";
+            if (modalUhrzeit && !modalUhrzeit.includes('Uhr')) modalUhrzeit += ' Uhr';
+            if (ev.endTime) {
+                let endZeitModal = String(ev.endTime);
+                if (!endZeitModal.includes('Uhr')) endZeitModal += ' Uhr';
+                modalUhrzeit += ` - ${endZeitModal}`;
+            }
 
             document.getElementById('modalTitle').innerText = ev.name;
-            document.getElementById('modalDateTime').innerText = `${datumAnzeige} ab ${uhrzeitAnzeige}`;
+            document.getElementById('modalDateTime').innerText = `${ev.datum} ab ${modalUhrzeit}`;
             
-            // Druck-Button einblenden, falls Fahrer vorhanden
             const printContainer = document.getElementById('modalPrintContainer');
-            printContainer.classList.toggle('hidden', !(ev.drivers && ev.drivers.length > 0));
+            if (printContainer) {
+                printContainer.classList.toggle('hidden', !(ev.drivers && ev.drivers.length > 0));
+            }
 
-            // Formular zurücksetzen
             document.getElementById('driverName').value = '';
             document.getElementById('endTime').value = ev.endTime || '';
             document.querySelector('input[name="duty"][value="Hin- und Rückfahrt"]').checked = true;
@@ -340,7 +355,6 @@
             renderDriverList(ev);
             renderEvents(); 
 
-            // Formular nach dem Speichern leeren, aber Modal offen lassen
             document.getElementById('driverName').value = '';
             closeModal();
             openModal(currentEventId); 
@@ -354,7 +368,9 @@
             renderEvents();
             
             const printContainer = document.getElementById('modalPrintContainer');
-            printContainer.classList.toggle('hidden', ev.drivers.length === 0);
+            if (printContainer) {
+                printContainer.classList.toggle('hidden', !ev.drivers || ev.drivers.length === 0);
+            }
         }
 
         function shareDriverInfo(driverIndex) {
@@ -364,10 +380,14 @@
             let startZeit = ev.uhrzeit ? String(ev.uhrzeit) : "";
             if(startZeit && !startZeit.includes('Uhr')) startZeit += ' Uhr';
             
-            let endeText = ev.endTime ? `Ende ca.: ${ev.endTime} Uhr` : "Ende: nach Rücksprache";
-            const datumAnzeige = getWochentag(ev.datum) ? `${getWochentag(ev.datum)} ${ev.datum}` : ev.datum;
+            let endeText = "Ende: nach Rücksprache";
+            if (ev.endTime) {
+                let endZeitShare = String(ev.endTime);
+                if (!endZeitShare.includes('Uhr')) endZeitShare += ' Uhr';
+                endeText = `Ende ca.: ${endZeitShare}`;
+            }
 
-            const text = `Hallo ${d.name},\nhier sind deine Einsatzdaten für das Bergtheater:\n\nVeranstaltung: ${ev.name}\nDatum: ${datumAnzeige}\nBeginn: ${startZeit}\n${endeText}\n\nDein Dienst: ${d.duty}\nBesuch der Veranstaltung: ${d.attends}\n\nBitte bestätigen. Danke!`;
+            const text = `Hallo ${d.name},\nhier sind deine Einsatzdaten für das Bergtheater:\n\nVeranstaltung: ${ev.name}\nDatum: ${ev.datum}\nBeginn: ${startZeit}\n${endeText}\n\nDein Dienst: ${d.duty}\nBesuch der Veranstaltung: ${d.attends}\n\nBitte bestätigen. Danke!`;
 
             if (navigator.share) {
                 navigator.share({ title: 'Fahrer-Einteilung Bergtheater', text: text }).catch(console.error);
@@ -380,7 +400,7 @@
         // 6. EVENT VERWALTUNG
         // ==========================================
         function deleteEvent(id, e) {
-            if(e) e.stopPropagation(); 
+            e.stopPropagation(); 
             if(confirm("Veranstaltung wirklich löschen?")) {
                 events = events.filter(ev => ev.id !== id);
                 saveData();
@@ -412,15 +432,20 @@
         }
 
         // ==========================================
-        // 7. DRUCK FUNKTIONEN
+        // 7. DRUCK FUNKTIONEN (Optimiert für Smartphone & PC)
         // ==========================================
         function printEvent(id, e) {
             if(e) e.stopPropagation(); 
             const ev = events.find(evnt => evnt.id === id);
             if(!ev) return;
             
-            const uhrzeitAnzeige = formatTimeDisplay(ev.uhrzeit, ev.endTime);
-            const datumAnzeige = getWochentag(ev.datum) ? `${getWochentag(ev.datum)} ${ev.datum}` : ev.datum;
+            let uhrzeitAnzeige = ev.uhrzeit ? String(ev.uhrzeit) : "";
+            if (uhrzeitAnzeige && !uhrzeitAnzeige.includes('Uhr')) uhrzeitAnzeige += ' Uhr';
+            if (ev.endTime) {
+                let endZeit = String(ev.endTime);
+                if (!endZeit.includes('Uhr')) endZeit += ' Uhr';
+                uhrzeitAnzeige += ` - ${endZeit}`;
+            }
 
             let driversHTML = '';
             if(ev.drivers && ev.drivers.length > 0) {
@@ -436,9 +461,7 @@
                         <tbody>
                 `;
                 ev.drivers.forEach(d => {
-                    // Kodierung von Sonderzeichen für den Ausdruck, um Fehlerzeichen () zu vermeiden
                     const safeDuty = d.duty.replace(/ü/g, '&uuml;').replace(/ö/g, '&ouml;').replace(/ä/g, '&auml;');
-                    
                     driversHTML += `
                         <tr>
                             <td><strong>${d.name}</strong></td>
@@ -460,23 +483,49 @@
                 <h2 class="print-event-name">${ev.name}</h2>
                 
                 <div class="print-meta-box">
-                    <strong>Datum:</strong> ${datumAnzeige} &nbsp;&nbsp;|&nbsp;&nbsp; <strong>Zeit:</strong> ${uhrzeitAnzeige}
+                    <strong>Datum:</strong> ${ev.datum} &nbsp;&nbsp;|&nbsp;&nbsp; <strong>Zeit:</strong> ${uhrzeitAnzeige}
                 </div>
                 
                 <h3 style="font-size: 16px; font-weight: bold; margin: 0 0 10px 0; color: #4f46e5;">Eingeteiltes Personal:</h3>
                 ${driversHTML}
             `;
             
+            // Setze den Modus auf Einzeldruck
+            isSinglePrintMode = true;
             document.body.classList.add('print-single-mode');
-            window.print();
-            document.body.classList.remove('print-single-mode');
+            
+            // WICHTIG FÜR MOBILE GERÄTE: 300ms warten, damit das Handy das neue Layout sicher übernimmt
+            setTimeout(() => {
+                window.print();
+            }, 300);
         }
+
+        // Globaler Aufräumer: Wird ausgeführt, sobald der Druckvorgang startet/beendet/abgebrochen wird
+        window.addEventListener('afterprint', () => {
+            if (isSinglePrintMode) {
+                isSinglePrintMode = false;
+                document.body.classList.remove('print-single-mode');
+            }
+        });
 
         // ==========================================
         // 8. DATEN & BACKUP (Excel/JSON)
         // ==========================================
         function saveData() {
             localStorage.setItem('bergtheater_events', JSON.stringify(events));
+        }
+
+        function generateId() {
+            return Math.random().toString(36).substr(2, 9);
+        }
+
+        function formatExcelDate(excelDate) {
+            const num = Number(excelDate);
+            if (!isNaN(num) && num > 30000 && num < 70000) {
+                const date = new Date(Math.round((num - 25569) * 86400 * 1000));
+                return date.toLocaleDateString('de-DE', {day: '2-digit', month: '2-digit', year: 'numeric'});
+            }
+            return excelDate; 
         }
 
         function handleExcelImport(e) {
@@ -555,44 +604,6 @@
             };
             reader.readAsText(file);
             e.target.value = ''; 
-        }
-
-        // ==========================================
-        // 9. HILFSFUNKTIONEN
-        // ==========================================
-        function generateId() {
-            return Math.random().toString(36).substr(2, 9);
-        }
-
-        function formatExcelDate(excelDate) {
-            const num = Number(excelDate);
-            if (!isNaN(num) && num > 30000 && num < 70000) {
-                const date = new Date(Math.round((num - 25569) * 86400 * 1000));
-                return date.toLocaleDateString('de-DE', {day: '2-digit', month: '2-digit', year: 'numeric'});
-            }
-            return excelDate; 
-        }
-
-        function getWochentag(datumString) {
-            if (!datumString) return '';
-            const parts = datumString.split('.');
-            if (parts.length === 3) {
-                const dateObj = new Date(parts[2], parts[1] - 1, parts[0]);
-                const tage = ['So.', 'Mo.', 'Di.', 'Mi.', 'Do.', 'Fr.', 'Sa.'];
-                return tage[dateObj.getDay()];
-            }
-            return '';
-        }
-
-        function formatTimeDisplay(start, end) {
-            let uhrzeit = start ? String(start) : "";
-            if (uhrzeit && !uhrzeit.includes('Uhr')) uhrzeit += ' Uhr';
-            if (end) {
-                let endZeit = String(end);
-                if (!endZeit.includes('Uhr')) endZeit += ' Uhr';
-                uhrzeit += ` - ${endZeit}`;
-            }
-            return uhrzeit;
         }
     </script>
 </body>
