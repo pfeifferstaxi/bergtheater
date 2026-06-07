@@ -33,28 +33,20 @@
             body { background-color: white; }
             .event-card { break-inside: avoid; border: 1px solid #ccc; box-shadow: none; margin-bottom: 1rem; }
             
-            /* Wenn die gesamte Liste gedruckt wird, blende den Einzeldruck aus */
-            body:not(.print-single-mode) #singlePrintArea {
-                display: none !important;
+            /* Standardm√§√üig beim normalen Listendruck ist das Einzelfeld unsichtbar */
+            #singlePrintArea {
+                display: none;
             }
 
-            /* Modus: Einzeldruck (Blendet alles andere radikal aus) */
-            body.print-single-mode header,
-            body.print-single-mode main,
-            body.print-single-mode #eventModal,
-            body.print-single-mode .fixed,
-            body.print-single-mode #eventList {
-                display: none !important;
-            }
-            
-            body.print-single-mode #singlePrintArea {
+            /* Wird direkt per Klasse f√ºr den mobilen Einzeldruck erzwungen */
+            #singlePrintArea.single-print-visible {
                 display: block !important;
                 padding: 10px;
                 font-family: Arial, sans-serif;
                 color: black;
             }
 
-            /* Design f¸r den Einzeldruck-Beleg */
+            /* Design f√ºr den Einzeldruck-Beleg */
             .print-header-box {
                 border-bottom: 3px solid #4f46e5;
                 padding-bottom: 10px;
@@ -100,7 +92,7 @@
             <input type="file" id="backupUpload" accept=".json, application/json, text/plain, */*" class="hidden" onchange="handleBackupImport(event)">
 
             <button onclick="deleteAllEvents()" class="bg-red-500 hover:bg-red-400 p-2 rounded flex flex-col items-center justify-center transition">
-                <i class="fa-solid fa-trash-can text-lg mb-1"></i> <span class="text-center">Alle<br>Lˆschen</span>
+                <i class="fa-solid fa-trash-can text-lg mb-1"></i> <span class="text-center">Alle<br>L√∂schen</span>
             </button>
 
             <button onclick="window.print()" class="bg-indigo-500 hover:bg-indigo-400 p-2 rounded flex flex-col items-center justify-center transition">
@@ -134,7 +126,7 @@
 
                 <hr class="my-4 border-slate-200">
 
-                <h3 class="font-semibold text-indigo-600 mb-3"><i class="fa-solid fa-user-plus mr-1"></i> Weiteren Fahrer hinzuf¸gen</h3>
+                <h3 class="font-semibold text-indigo-600 mb-3"><i class="fa-solid fa-user-plus mr-1"></i> Weiteren Fahrer hinzuf√ºgen</h3>
                 <div class="space-y-3 bg-slate-50 p-3 rounded-lg border">
                     
                     <select id="driverName" class="w-full p-2 border rounded focus:ring-2 focus:ring-indigo-500 outline-none bg-white">
@@ -142,8 +134,8 @@
                     
                     <div class="grid grid-cols-2 gap-2 text-sm">
                         <label class="flex items-center space-x-2 bg-white p-2 rounded border"><input type="radio" name="duty" value="Hinfahrt" class="text-indigo-600"> <span>Hinfahrt</span></label>
-                        <label class="flex items-center space-x-2 bg-white p-2 rounded border"><input type="radio" name="duty" value="R¸ckfahrt" class="text-indigo-600"> <span>R¸ckfahrt</span></label>
-                        <label class="flex items-center space-x-2 bg-white p-2 rounded border col-span-2"><input type="radio" name="duty" value="Hin- und R¸ckfahrt" checked class="text-indigo-600"> <span>Hin- & R¸ckfahrt</span></label>
+                        <label class="flex items-center space-x-2 bg-white p-2 rounded border"><input type="radio" name="duty" value="R√ºckfahrt" class="text-indigo-600"> <span>R√ºckfahrt</span></label>
+                        <label class="flex items-center space-x-2 bg-white p-2 rounded border col-span-2"><input type="radio" name="duty" value="Hin- und R√ºckfahrt" checked class="text-indigo-600"> <span>Hin- & R√ºckfahrt</span></label>
                     </div>
 
                     <div class="text-sm font-medium mt-2">Besucht die Veranstaltung?</div>
@@ -158,7 +150,7 @@
                     </div>
 
                     <button onclick="addDriver()" class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded mt-2 transition">
-                        Fahrer speichern & hinzuf¸gen
+                        Fahrer‰øùÂ≠ò & hinzuf√ºgen
                     </button>
                 </div>
             </div>
@@ -170,14 +162,13 @@
         // 1. KONFIGURATION & STATE
         // ==========================================
         const fahrerNamen = [
-            "Marco Pfeiffer", "Michaela L¸ders", "Michael L¸ders", 
+            "Marco Pfeiffer", "Michaela L√ºders", "Michael L√ºders", 
             "Kevin Gawe", "Tommy Wall", "Nicole Ritzrau", 
             "Kimberley", "Uwe Busse", "Thomas Kaufmann"
         ];
 
         let events = JSON.parse(localStorage.getItem('bergtheater_events')) || [];
         let currentEventId = null;
-        let isSinglePrintMode = false; // Steuert den stabilen Mobil-Druck
 
         // ==========================================
         // 2. INITIALISIERUNG
@@ -205,7 +196,7 @@
 
         function initDropdown() {
             const select = document.getElementById('driverName');
-            let optionsHTML = '<option value="">-- Bitte Fahrer ausw‰hlen --</option>';
+            let optionsHTML = '<option value="">-- Bitte Fahrer ausw√§hlen --</option>';
             fahrerNamen.sort().forEach(name => {
                 optionsHTML += `<option value="${name}">${name}</option>`;
             });
@@ -213,7 +204,7 @@
         }
 
         // ==========================================
-        // 3. RENDERING (Benutzeroberfl‰che)
+        // 3. RENDERING (Benutzeroberfl√§che)
         // ==========================================
         function renderEvents() {
             const container = document.getElementById('eventList');
@@ -321,7 +312,7 @@
 
             document.getElementById('driverName').value = '';
             document.getElementById('endTime').value = ev.endTime || '';
-            document.querySelector('input[name="duty"][value="Hin- und R¸ckfahrt"]').checked = true;
+            document.querySelector('input[name="duty"][value="Hin- und R√ºckfahrt"]').checked = true;
             document.querySelector('input[name="attends"][value="Nein"]').checked = true;
 
             renderDriverList(ev);
@@ -338,7 +329,7 @@
         // ==========================================
         function addDriver() {
             const name = document.getElementById('driverName').value;
-            if(!name) { alert("Bitte einen Fahrer aus der Liste ausw‰hlen."); return; }
+            if(!name) { alert("Bitte einen Fahrer aus der Liste ausw√§hlen."); return; }
 
             const duty = document.querySelector('input[name="duty"]:checked').value;
             const attends = document.querySelector('input[name="attends"]:checked').value;
@@ -380,19 +371,19 @@
             let startZeit = ev.uhrzeit ? String(ev.uhrzeit) : "";
             if(startZeit && !startZeit.includes('Uhr')) startZeit += ' Uhr';
             
-            let endeText = "Ende: nach R¸cksprache";
+            let endeText = "Ende: nach R√ºcksprache";
             if (ev.endTime) {
                 let endZeitShare = String(ev.endTime);
                 if (!endZeitShare.includes('Uhr')) endZeitShare += ' Uhr';
                 endeText = `Ende ca.: ${endZeitShare}`;
             }
 
-            const text = `Hallo ${d.name},\nhier sind deine Einsatzdaten f¸r das Bergtheater:\n\nVeranstaltung: ${ev.name}\nDatum: ${ev.datum}\nBeginn: ${startZeit}\n${endeText}\n\nDein Dienst: ${d.duty}\nBesuch der Veranstaltung: ${d.attends}\n\nBitte best‰tigen. Danke!`;
+            const text = `Hallo ${d.name},\nhier sind deine Einsatzdaten f√ºr das Bergtheater:\n\nVeranstaltung: ${ev.name}\nDatum: ${ev.datum}\nBeginn: ${startZeit}\n${endeText}\n\nDein Dienst: ${d.duty}\nBesuch der Veranstaltung: ${d.attends}\n\nBitte best√§tigen. Danke!`;
 
             if (navigator.share) {
                 navigator.share({ title: 'Fahrer-Einteilung Bergtheater', text: text }).catch(console.error);
             } else {
-                prompt("Dein Ger‰t unterst¸tzt kein direktes Teilen. Bitte kopiere diesen Text:", text);
+                prompt("Dein Ger√§t unterst√ºtzt kein direktes Teilen. Bitte kopiere diesen Text:", text);
             }
         }
 
@@ -401,7 +392,7 @@
         // ==========================================
         function deleteEvent(id, e) {
             e.stopPropagation(); 
-            if(confirm("Veranstaltung wirklich lˆschen?")) {
+            if(confirm("Veranstaltung wirklich l√∂schen?")) {
                 events = events.filter(ev => ev.id !== id);
                 saveData();
                 renderEvents();
@@ -409,7 +400,7 @@
         }
 
         function deleteAllEvents() {
-            if(confirm("Mˆchtest du WIRKLICH ALLE Veranstaltungen lˆschen? Dies kann nicht r¸ckg‰ngig gemacht werden!")) {
+            if(confirm("M√∂chtest du WIRKLICH ALLE Veranstaltungen l√∂schen? Dies kann nicht r√ºckg√§ngig gemacht werden!")) {
                 events = [];
                 saveData();
                 renderEvents();
@@ -432,7 +423,7 @@
         }
 
         // ==========================================
-        // 7. DRUCK FUNKTIONEN (Optimiert f¸r Smartphone & PC)
+        // 7. DRUCK FUNKTIONEN (Direkte Utility-Steuerung f√ºr Handys)
         // ==========================================
         function printEvent(id, e) {
             if(e) e.stopPropagation(); 
@@ -461,7 +452,7 @@
                         <tbody>
                 `;
                 ev.drivers.forEach(d => {
-                    const safeDuty = d.duty.replace(/¸/g, '&uuml;').replace(/ˆ/g, '&ouml;').replace(/‰/g, '&auml;');
+                    const safeDuty = d.duty.replace(/√º/g, '&uuml;').replace(/√∂/g, '&ouml;').replace(/√§/g, '&auml;');
                     driversHTML += `
                         <tr>
                             <td><strong>${d.name}</strong></td>
@@ -490,21 +481,30 @@
                 ${driversHTML}
             `;
             
-            // Setze den Modus auf Einzeldruck
-            isSinglePrintMode = true;
-            document.body.classList.add('print-single-mode');
+            // DIE RETTUNG F√úR SMARTPHONES: 
+            // Wir verstecken die Hauptliste direkt √ºber die existierende 'no-print' Klasse...
+            document.getElementById('eventList').classList.add('no-print');
             
-            // WICHTIG F‹R MOBILE GERƒTE: 300ms warten, damit das Handy das neue Layout sicher ¸bernimmt
+            // ...und zwingen das Einzelfeld zur Anzeige
+            printArea.classList.add('single-print-visible');
+            
+            // Dem mobilen UI-Thread eine kurze Pause geben, um das Layout neu zu berechnen
             setTimeout(() => {
                 window.print();
             }, 300);
         }
 
-        // Globaler Aufr‰umer: Wird ausgef¸hrt, sobald der Druckvorgang startet/beendet/abgebrochen wird
+        // Sobald das Druckfenster (auch am Handy) schlie√üt oder abgebrochen wird, 
+        // setzen wir alles sofort wieder zur√ºck
         window.addEventListener('afterprint', () => {
-            if (isSinglePrintMode) {
-                isSinglePrintMode = false;
-                document.body.classList.remove('print-single-mode');
+            const eventList = document.getElementById('eventList');
+            if (eventList) {
+                eventList.classList.remove('no-print');
+            }
+            const printArea = document.getElementById('singlePrintArea');
+            if (printArea) {
+                printArea.classList.remove('single-print-visible');
+                printArea.innerHTML = '';
             }
         });
 
@@ -561,7 +561,7 @@
                     renderEvents();
                     alert(importedCount + " Veranstaltungen erfolgreich importiert!");
                 } else {
-                    alert("Konnte keine Daten finden. Bitte pr¸fe, ob deine Tabelle in Spalte A beginnt.");
+                    alert("Konnte keine Daten finden. Bitte pr√ºfe, ob deine Tabelle in Spalte A beginnt.");
                 }
             };
             reader.readAsArrayBuffer(file);
@@ -596,7 +596,7 @@
                         renderEvents();
                         alert("Backup erfolgreich geladen!");
                     } else {
-                        alert("Ung¸ltige Backup-Datei.");
+                        alert("Ung√ºltige Backup-Datei.");
                     }
                 } catch(err) {
                     alert("Fehler beim Lesen der Backup-Datei.");
