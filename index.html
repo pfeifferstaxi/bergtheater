@@ -18,12 +18,27 @@
             body { background-color: white; }
             .event-card { break-inside: avoid; border: 1px solid #ccc; box-shadow: none; margin-bottom: 1rem; }
             
-            /* Steuerung fÃ¼r den Einzeldruck */
-            body.print-single-mode > *:not(#singlePrintArea) {
+            /* Striktes Ausblenden aller App-Elemente im Einzeldruck-Modus */
+            body.print-single-mode header,
+            body.print-single-mode main,
+            body.print-single-mode #eventModal,
+            body.print-single-mode .fixed,
+            body.print-single-mode div {
                 display: none !important;
             }
-            body.print-single-mode #singlePrintArea {
+            body.print-single-mode #singlePrintArea,
+            body.print-single-mode #singlePrintArea * {
                 display: block !important;
+            }
+            body.print-single-mode #singlePrintArea table {
+                display: table !important;
+            }
+            body.print-single-mode #singlePrintArea tr {
+                display: table-row !important;
+            }
+            body.print-single-mode #singlePrintArea th,
+            body.print-single-mode #singlePrintArea td {
+                display: table-cell !important;
             }
         }
         body { -webkit-tap-highlight-color: transparent; }
@@ -50,7 +65,7 @@
             <input type="file" id="backupUpload" accept=".json, application/json, text/plain, */*" class="hidden" onchange="handleBackupImport(event)">
 
             <button onclick="deleteAllEvents()" class="bg-red-500 hover:bg-red-400 p-2 rounded flex flex-col items-center justify-center transition">
-                <i class="fa-solid fa-trash-can text-lg mb-1"></i> <span class="text-center">Alle<br>LÃ¶schen</span>
+                <i class="fa-solid fa-trash-can text-lg mb-1"></i> <span class="text-center">Alle<br>Löschen</span>
             </button>
 
             <button onclick="window.print()" class="bg-indigo-500 hover:bg-indigo-400 p-2 rounded flex flex-col items-center justify-center transition">
@@ -65,23 +80,26 @@
     <div id="eventModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex justify-center items-end sm:items-center no-print">
         <div class="bg-white w-full sm:max-w-lg rounded-t-2xl sm:rounded-2xl max-h-[90vh] overflow-y-auto flex flex-col">
             <div class="p-4 border-b flex justify-between items-center sticky top-0 bg-white rounded-t-2xl z-10">
-                <div class="flex items-center space-x-2 truncate pr-2">
-                    <h2 id="modalTitle" class="font-bold text-lg truncate">Event</h2>
-                    <button id="modalPrintBtn" onclick="printEvent(currentEventId)" class="text-indigo-500 hover:text-indigo-700 px-2 hidden" title="Diese Veranstaltung drucken">
-                        <i class="fa-solid fa-print text-lg"></i>
-                    </button>
-                </div>
+                <h2 id="modalTitle" class="font-bold text-lg truncate pr-2">Event</h2>
                 <button onclick="closeModal()" class="text-slate-500 text-2xl px-2">&times;</button>
             </div>
             
             <div class="p-4 flex-grow">
                 <p class="text-sm text-slate-500 mb-4" id="modalDateTime"></p>
 
-                <div id="driverList" class="space-y-3 mb-6"></div>
+                <!-- Liste der bereits eingetragenen Fahrer -->
+                <div id="driverList" class="space-y-3 mb-4"></div>
+
+                <!-- Prominenter Print-Button im Modal (wird per JS ein-/ausgeblendet) -->
+                <div id="modalPrintContainer" class="hidden mb-6">
+                    <button onclick="printEvent(currentEventId)" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 px-4 rounded-xl transition flex items-center justify-center gap-2 shadow-sm">
+                        <i class="fa-solid fa-print"></i> Diese Veranstaltung einzeln drucken
+                    </button>
+                </div>
 
                 <hr class="my-4 border-slate-200">
 
-                <h3 class="font-semibold text-indigo-600 mb-3"><i class="fa-solid fa-user-plus mr-1"></i> Weiteren Fahrer hinzufÃ¼gen</h3>
+                <h3 class="font-semibold text-indigo-600 mb-3"><i class="fa-solid fa-user-plus mr-1"></i> Weiteren Fahrer hinzufügen</h3>
                 <div class="space-y-3 bg-slate-50 p-3 rounded-lg border">
                     
                     <select id="driverName" class="w-full p-2 border rounded focus:ring-2 focus:ring-indigo-500 outline-none bg-white">
@@ -89,8 +107,8 @@
                     
                     <div class="grid grid-cols-2 gap-2 text-sm">
                         <label class="flex items-center space-x-2 bg-white p-2 rounded border"><input type="radio" name="duty" value="Hinfahrt" class="text-indigo-600"> <span>Hinfahrt</span></label>
-                        <label class="flex items-center space-x-2 bg-white p-2 rounded border"><input type="radio" name="duty" value="RÃ¼ckfahrt" class="text-indigo-600"> <span>RÃ¼ckfahrt</span></label>
-                        <label class="flex items-center space-x-2 bg-white p-2 rounded border col-span-2"><input type="radio" name="duty" value="Hin- und RÃ¼ckfahrt" checked class="text-indigo-600"> <span>Hin- & RÃ¼ckfahrt</span></label>
+                        <label class="flex items-center space-x-2 bg-white p-2 rounded border"><input type="radio" name="duty" value="Rückfahrt" class="text-indigo-600"> <span>Rückfahrt</span></label>
+                        <label class="flex items-center space-x-2 bg-white p-2 rounded border col-span-2"><input type="radio" name="duty" value="Hin- und Rückfahrt" checked class="text-indigo-600"> <span>Hin- & Rückfahrt</span></label>
                     </div>
 
                     <div class="text-sm font-medium mt-2">Besucht die Veranstaltung?</div>
@@ -105,18 +123,21 @@
                     </div>
 
                     <button onclick="addDriver()" class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded mt-2 transition">
-                        Fahrer speichern & hinzufÃ¼gen
+                        Fahrer speichern & hinzufügen
                     </button>
                 </div>
             </div>
         </div>
     </div>
 
+    <!-- Container für den sauberen Einzeldruck (wird auf dem Bildschirm versteckt) -->
+    <div id="singlePrintArea"></div>
+
     <script>
         const fahrerNamen = [
             "Marco Pfeiffer", 
-            "Michaela LÃ¼ders", 
-            "Michael LÃ¼ders", 
+            "Michaela Lüders", 
+            "Michael Lüders", 
             "Kevin Gawe", 
             "Tommy Wall", 
             "Nicole Ritzrau", 
@@ -171,7 +192,7 @@
 
         function initDropdown() {
             const select = document.getElementById('driverName');
-            let optionsHTML = '<option value="">-- Bitte Fahrer auswÃ¤hlen --</option>';
+            let optionsHTML = '<option value="">-- Bitte Fahrer auswählen --</option>';
             fahrerNamen.sort().forEach(name => {
                 optionsHTML += `<option value="${name}">${name}</option>`;
             });
@@ -214,7 +235,6 @@
                     ? ev.drivers.map(d => `<span class="bg-indigo-100 text-indigo-800 text-xs px-2 py-1 rounded inline-block mr-1 mb-1"><i class="fa-solid fa-user mr-1"></i>${d.name}</span>`).join('') 
                     : '<span class="text-slate-400 text-xs italic">Noch keine Fahrer eingeteilt</span>';
 
-                // Print-Button nur erzeugen, wenn Fahrer vorhanden sind
                 const printButton = hasDrivers 
                     ? `<button onclick="printEvent('${ev.id}', event)" class="text-indigo-500 hover:text-indigo-700 px-2 no-print" title="Diese Veranstaltung einzeln drucken"><i class="fa-solid fa-print"></i></button>`
                     : '';
@@ -259,7 +279,7 @@
 
         function deleteEvent(id, e) {
             e.stopPropagation(); 
-            if(confirm("Veranstaltung wirklich lÃ¶schen?")) {
+            if(confirm("Veranstaltung wirklich löschen?")) {
                 events = events.filter(ev => ev.id !== id);
                 saveData();
                 renderEvents();
@@ -267,7 +287,7 @@
         }
 
         function deleteAllEvents() {
-            if(confirm("MÃ¶chtest du WIRKLICH ALLE Veranstaltungen lÃ¶schen? Dies kann nicht rÃ¼ckgÃ¤ngig gemacht werden!")) {
+            if(confirm("Möchtest du WIRKLICH ALLE Veranstaltungen löschen? Dies kann nicht rückgängig gemacht werden!")) {
                 events = [];
                 saveData();
                 renderEvents();
@@ -295,17 +315,17 @@
             document.getElementById('modalTitle').innerText = ev.name;
             document.getElementById('modalDateTime').innerText = `${datumAnzeige} ab ${modalUhrzeit}`;
             
-            // Sichtbarkeit des Print-Buttons im Modal steuern
-            const modalPrintBtn = document.getElementById('modalPrintBtn');
+            // Sichtbarkeit des Print-Buttons steuern
+            const printContainer = document.getElementById('modalPrintContainer');
             if (ev.drivers && ev.drivers.length > 0) {
-                modalPrintBtn.classList.remove('hidden');
+                printContainer.classList.remove('hidden');
             } else {
-                modalPrintBtn.classList.add('hidden');
+                printContainer.classList.add('hidden');
             }
 
             document.getElementById('driverName').value = '';
             document.getElementById('endTime').value = ev.endTime || '';
-            document.querySelector('input[name="duty"][value="Hin- und RÃ¼ckfahrt"]').checked = true;
+            document.querySelector('input[name="duty"][value="Hin- und Rückfahrt"]').checked = true;
             document.querySelector('input[name="attends"][value="Nein"]').checked = true;
 
             renderDriverList(ev);
@@ -344,7 +364,7 @@
 
         function addDriver() {
             const name = document.getElementById('driverName').value;
-            if(!name) { alert("Bitte einen Fahrer aus der Liste auswÃ¤hlen."); return; }
+            if(!name) { alert("Bitte einen Fahrer aus der Liste auswählen."); return; }
 
             const duty = document.querySelector('input[name="duty"]:checked').value;
             const attends = document.querySelector('input[name="attends"]:checked').value;
@@ -372,6 +392,12 @@
             saveData();
             renderDriverList(ev);
             renderEvents();
+            
+            // Druck-Button updaten, falls kein Fahrer mehr da ist
+            const printContainer = document.getElementById('modalPrintContainer');
+            if (ev.drivers.length === 0) {
+                printContainer.classList.add('hidden');
+            }
         }
 
         function shareDriverInfo(driverIndex) {
@@ -381,7 +407,7 @@
             let startZeit = ev.uhrzeit ? String(ev.uhrzeit) : "";
             if(startZeit && !startZeit.includes('Uhr')) startZeit += ' Uhr';
             
-            let endeText = "Ende: nach RÃ¼cksprache";
+            let endeText = "Ende: nach Rücksprache";
             if (ev.endTime) {
                 let endZeitShare = String(ev.endTime);
                 if (!endZeitShare.includes('Uhr')) {
@@ -393,7 +419,7 @@
             const wochentag = getWochentag(ev.datum);
             const datumAnzeige = wochentag ? `${wochentag} ${ev.datum}` : ev.datum;
 
-            const text = `Hallo ${d.name},\nhier sind deine Einsatzdaten fÃ¼r das Bergtheater:\n\nVeranstaltung: ${ev.name}\nDatum: ${datumAnzeige}\nBeginn: ${startZeit}\n${endeText}\n\nDein Dienst: ${d.duty}\nBesuch der Veranstaltung: ${d.attends}\n\nBitte bestÃ¤tigen. Danke!`;
+            const text = `Hallo ${d.name},\nhier sind deine Einsatzdaten für das Bergtheater:\n\nVeranstaltung: ${ev.name}\nDatum: ${datumAnzeige}\nBeginn: ${startZeit}\n${endeText}\n\nDein Dienst: ${d.duty}\nBesuch der Veranstaltung: ${d.attends}\n\nBitte bestätigen. Danke!`;
 
             if (navigator.share) {
                 navigator.share({
@@ -401,11 +427,11 @@
                     text: text
                 }).catch(console.error);
             } else {
-                prompt("Dein GerÃ¤t unterstÃ¼tzt kein direktes Teilen. Bitte kopiere diesen Text:", text);
+                prompt("Dein Gerät unterstützt kein direktes Teilen. Bitte kopiere diesen Text:", text);
             }
         }
 
-        // Funktion fÃ¼r den Einzeldruck einer Veranstaltung
+        // Funktion für den isolierten Einzeldruck einer Veranstaltung
         function printEvent(id, e) {
             if(e) e.stopPropagation(); 
             const ev = events.find(evnt => evnt.id === id);
@@ -424,22 +450,22 @@
             let driversHTML = '';
             if(ev.drivers && ev.drivers.length > 0) {
                 driversHTML = `
-                    <table style="width:100%; border-collapse: collapse; margin-top: 20px; font-family: sans-serif; font-size: 14px;">
+                    <table style="width:100%; border-collapse: collapse; margin-top: 20px; font-family: Arial, sans-serif; font-size: 15px; border: 1px solid #cbd5e1;">
                         <thead>
-                            <tr style="border-bottom: 2px solid #4f46e5; text-align: left; background-color: #f8fafc;">
-                                <th style="padding: 10px; font-weight: bold; color: #1e293b;">Fahrer</th>
-                                <th style="padding: 10px; font-weight: bold; color: #1e293b;">Dienst</th>
-                                <th style="padding: 10px; font-weight: bold; color: #1e293b;">Besucht Veranstaltung</th>
+                            <tr style="border-bottom: 2px solid #4f46e5; text-align: left; background-color: #f1f5f9;">
+                                <th style="padding: 12px 10px; font-weight: bold; color: #1e293b; border-right: 1px solid #cbd5e1;">Fahrer</th>
+                                <th style="padding: 12px 10px; font-weight: bold; color: #1e293b; border-right: 1px solid #cbd5e1;">Dienst</th>
+                                <th style="padding: 12px 10px; font-weight: bold; color: #1e293b;">Besucht Veranstaltung?</th>
                             </tr>
                         </thead>
                         <tbody>
                 `;
                 ev.drivers.forEach(d => {
                     driversHTML += `
-                        <tr style="border-bottom: 1px solid #e2e8f0;">
-                            <td style="padding: 12px 10px; font-weight: bold; color: #0f172a;">${d.name}</td>
-                            <td style="padding: 12px 10px; color: #334155;">${d.duty}</td>
-                            <td style="padding: 12px 10px; color: #334155;">${d.attends}</td>
+                        <tr style="border-bottom: 1px solid #cbd5e1;">
+                            <td style="padding: 12px 10px; font-weight: bold; color: #000; border-right: 1px solid #cbd5e1;">${d.name}</td>
+                            <td style="padding: 12px 10px; color: #000; border-right: 1px solid #cbd5e1;">${d.duty}</td>
+                            <td style="padding: 12px 10px; color: #000;">${d.attends}</td>
                         </tr>
                     `;
                 });
@@ -454,21 +480,26 @@
             }
             
             printArea.innerHTML = `
-                <div style="padding: 10px; font-family: sans-serif;">
-                    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #e2e8f0; padding-bottom: 12px; margin-bottom: 20px;">
-                        <h1 style="font-size: 20px; font-weight: bold; color: #1e293b; margin: 0;">
-                            <i class="fa-solid fa-van-shuttle" style="color: #4f46e5;"></i> Bergtheater Fahrer-Planer
+                <div style="padding: 20px; font-family: Arial, sans-serif; color: #000; background-color: #fff;">
+                    <div style="border-bottom: 3px solid #4f46e5; padding-bottom: 10px; margin-bottom: 25px; display: flex; justify-content: space-between; align-items: flex-end;">
+                        <h1 style="font-size: 22px; font-weight: bold; color: #4f46e5; margin: 0;">
+                            <i class="fa-solid fa-van-shuttle"></i> Fahrer-Planung Bergtheater
                         </h1>
-                        <span style="font-size: 12px; color: #64748b;">Ausdruck vom ${new Date().toLocaleDateString('de-DE')}</span>
+                        <span style="font-size: 12px; color: #475569;">Ausgedruckt am: ${new Date().toLocaleDateString('de-DE')} um ${new Date().toLocaleTimeString('de-DE', {hour: '2-digit', minute:'2-digit'})} Uhr</span>
                     </div>
-                    <h2 style="font-size: 22px; font-weight: bold; color: #4f46e5; margin: 0 0 8px 0;">${ev.name}</h2>
-                    <div style="font-size: 14px; color: #475569; margin-bottom: 20px; background-color: #f1f5f9; padding: 10px; border-radius: 6px;">
+                    
+                    <h2 style="font-size: 24px; font-weight: bold; color: #000; margin: 0 0 10px 0;">${ev.name}</h2>
+                    
+                    <div style="font-size: 15px; color: #000; margin-bottom: 25px; background-color: #f8fafc; padding: 12px; border: 1px solid #e2e8f0; border-radius: 6px;">
                         <strong>Datum:</strong> ${datumAnzeige} &nbsp;&nbsp;|&nbsp;&nbsp; <strong>Zeit:</strong> ${uhrzeitAnzeige}
                     </div>
+                    
+                    <h3 style="font-size: 16px; font-weight: bold; margin: 0 0 10px 0; color: #4f46e5;">Eingeteiltes Personal:</h3>
                     ${driversHTML}
                 </div>
             `;
             
+            // Klasse hinzufügen, um alles andere via CSS komplett unsichtbar zu schalten
             document.body.classList.add('print-single-mode');
             window.print();
             document.body.classList.remove('print-single-mode');
@@ -516,7 +547,7 @@
                     renderEvents();
                     alert(importedCount + " Veranstaltungen erfolgreich importiert!");
                 } else {
-                    alert("Konnte keine Daten finden. Bitte prÃ¼fe, ob deine Tabelle in Spalte A beginnt.");
+                    alert("Konnte keine Daten finden. Bitte prüfe, ob deine Tabelle in Spalte A beginnt.");
                 }
             };
             reader.readAsArrayBuffer(file);
@@ -551,7 +582,7 @@
                         renderEvents();
                         alert("Backup erfolgreich geladen!");
                     } else {
-                        alert("UngÃ¼ltige Backup-Datei.");
+                        alert("Ungültige Backup-Datei.");
                     }
                 } catch(err) {
                     alert("Fehler beim Lesen der Backup-Datei.");
