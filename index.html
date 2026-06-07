@@ -4,6 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Bergtheater Fahrer-Planer</title>
+    
+    <link rel="manifest" href="./manifest.json">
+    <meta name="theme-color" content="#4f46e5">
+    <link rel="apple-touch-icon" href="./icon-192.png">
+    
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -36,7 +41,7 @@
             <input type="file" id="backupUpload" accept=".json" class="hidden" onchange="handleBackupImport(event)">
 
             <button onclick="deleteAllEvents()" class="bg-red-500 hover:bg-red-400 p-2 rounded flex flex-col items-center justify-center transition">
-                <i class="fa-solid fa-trash-can text-lg mb-1"></i> <span class="text-center">Alle<br>LÃ¶schen</span>
+                <i class="fa-solid fa-trash-can text-lg mb-1"></i> <span class="text-center">Alle<br>Löschen</span>
             </button>
 
             <button onclick="window.print()" class="bg-indigo-500 hover:bg-indigo-400 p-2 rounded flex flex-col items-center justify-center transition">
@@ -62,7 +67,7 @@
 
                 <hr class="my-4 border-slate-200">
 
-                <h3 class="font-semibold text-indigo-600 mb-3"><i class="fa-solid fa-user-plus mr-1"></i> Weiteren Fahrer hinzufÃ¼gen</h3>
+                <h3 class="font-semibold text-indigo-600 mb-3"><i class="fa-solid fa-user-plus mr-1"></i> Weiteren Fahrer hinzufügen</h3>
                 <div class="space-y-3 bg-slate-50 p-3 rounded-lg border">
                     
                     <select id="driverName" class="w-full p-2 border rounded focus:ring-2 focus:ring-indigo-500 outline-none bg-white">
@@ -70,8 +75,8 @@
                     
                     <div class="grid grid-cols-2 gap-2 text-sm">
                         <label class="flex items-center space-x-2 bg-white p-2 rounded border"><input type="radio" name="duty" value="Hinfahrt" class="text-indigo-600"> <span>Hinfahrt</span></label>
-                        <label class="flex items-center space-x-2 bg-white p-2 rounded border"><input type="radio" name="duty" value="RÃ¼ckfahrt" class="text-indigo-600"> <span>RÃ¼ckfahrt</span></label>
-                        <label class="flex items-center space-x-2 bg-white p-2 rounded border col-span-2"><input type="radio" name="duty" value="Hin- und RÃ¼ckfahrt" checked class="text-indigo-600"> <span>Hin- & RÃ¼ckfahrt</span></label>
+                        <label class="flex items-center space-x-2 bg-white p-2 rounded border"><input type="radio" name="duty" value="Rückfahrt" class="text-indigo-600"> <span>Rückfahrt</span></label>
+                        <label class="flex items-center space-x-2 bg-white p-2 rounded border col-span-2"><input type="radio" name="duty" value="Hin- und Rückfahrt" checked class="text-indigo-600"> <span>Hin- & Rückfahrt</span></label>
                     </div>
 
                     <div class="text-sm font-medium mt-2">Besucht die Veranstaltung?</div>
@@ -86,7 +91,7 @@
                     </div>
 
                     <button onclick="addDriver()" class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded mt-2 transition">
-                        Fahrer speichern & hinzufÃ¼gen
+                        Fahrer speichern & hinzufügen
                     </button>
                 </div>
             </div>
@@ -94,11 +99,10 @@
     </div>
 
     <script>
-        // Aktualisierte Fahrerliste
         const fahrerNamen = [
             "Marco Pfeiffer", 
-            "Michaela LÃ¼ders", 
-            "Michael LÃ¼ders", 
+            "Michaela Lüders", 
+            "Michael Lüders", 
             "Kevin Gawe", 
             "Tommy Wall", 
             "Nicole Ritzrau", 
@@ -110,10 +114,8 @@
         let events = JSON.parse(localStorage.getItem('bergtheater_events')) || [];
         let currentEventId = null;
 
-        // Verbesserte Datumsumwandlung (fÃ¤ngt auch Strings wie "46185" ab)
         function formatExcelDate(excelDate) {
             const num = Number(excelDate);
-            // Wenn es eine Zahl im typischen Excel-Datumsbereich ist
             if (!isNaN(num) && num > 30000 && num < 70000) {
                 const date = new Date(Math.round((num - 25569) * 86400 * 1000));
                 return date.toLocaleDateString('de-DE', {day: '2-digit', month: '2-digit', year: 'numeric'});
@@ -124,7 +126,13 @@
         window.onload = () => {
             initDropdown();
             
-            // Repariere alte Speicherdaten
+            // --- Service Worker Registrierung (Hinzugefügt) ---
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.register('./sw.js')
+                    .then(() => console.log('Service Worker registriert'))
+                    .catch(err => console.error('Service Worker Fehler:', err));
+            }
+            
             events = events.map(ev => {
                 if (ev.datum && !ev.datum.includes('.')) {
                     ev.datum = formatExcelDate(ev.datum);
@@ -139,7 +147,7 @@
 
         function initDropdown() {
             const select = document.getElementById('driverName');
-            let optionsHTML = '<option value="">-- Bitte Fahrer auswÃ¤hlen --</option>';
+            let optionsHTML = '<option value="">-- Bitte Fahrer auswählen --</option>';
             fahrerNamen.sort().forEach(name => {
                 optionsHTML += `<option value="${name}">${name}</option>`;
             });
@@ -180,7 +188,6 @@
                     ? ev.drivers.map(d => `<span class="bg-indigo-100 text-indigo-800 text-xs px-2 py-1 rounded inline-block mr-1 mb-1"><i class="fa-solid fa-user mr-1"></i>${d.name}</span>`).join('') 
                     : '<span class="text-slate-400 text-xs italic">Noch keine Fahrer eingeteilt</span>';
 
-                // Uhrzeit und Endzeit zusammenbauen
                 let uhrzeitAnzeige = ev.uhrzeit ? String(ev.uhrzeit) : "";
                 if (uhrzeitAnzeige && !uhrzeitAnzeige.includes('Uhr')) {
                     uhrzeitAnzeige += ' Uhr';
@@ -211,7 +218,7 @@
 
         function deleteEvent(id, e) {
             e.stopPropagation(); 
-            if(confirm("Veranstaltung wirklich lÃ¶schen?")) {
+            if(confirm("Veranstaltung wirklich löschen?")) {
                 events = events.filter(ev => ev.id !== id);
                 saveData();
                 renderEvents();
@@ -219,7 +226,7 @@
         }
 
         function deleteAllEvents() {
-            if(confirm("MÃ¶chtest du WIRKLICH ALLE Veranstaltungen lÃ¶schen? Dies kann nicht rÃ¼ckgÃ¤ngig gemacht werden!")) {
+            if(confirm("Möchtest du WIRKLICH ALLE Veranstaltungen löschen? Dies kann nicht rückgängig gemacht werden!")) {
                 events = [];
                 saveData();
                 renderEvents();
@@ -230,7 +237,6 @@
             currentEventId = id;
             const ev = events.find(e => e.id === id);
             
-            // Endzeit fÃ¼r die Anzeige im Modal oben zusammenbauen
             let modalUhrzeit = ev.uhrzeit ? String(ev.uhrzeit) : "";
             if (modalUhrzeit && !modalUhrzeit.includes('Uhr')) modalUhrzeit += ' Uhr';
             if (ev.endTime) modalUhrzeit += ` (Ende ca. ${ev.endTime} Uhr)`;
@@ -240,7 +246,7 @@
             
             document.getElementById('driverName').value = '';
             document.getElementById('endTime').value = ev.endTime || '';
-            document.querySelector('input[name="duty"][value="Hin- und RÃ¼ckfahrt"]').checked = true;
+            document.querySelector('input[name="duty"][value="Hin- und Rückfahrt"]').checked = true;
             document.querySelector('input[name="attends"][value="Nein"]').checked = true;
 
             renderDriverList(ev);
@@ -279,7 +285,7 @@
 
         function addDriver() {
             const name = document.getElementById('driverName').value;
-            if(!name) { alert("Bitte einen Fahrer aus der Liste auswÃ¤hlen."); return; }
+            if(!name) { alert("Bitte einen Fahrer aus der Liste auswählen."); return; }
 
             const duty = document.querySelector('input[name="duty"]:checked').value;
             const attends = document.querySelector('input[name="attends"]:checked').value;
@@ -288,7 +294,6 @@
             const ev = events.find(e => e.id === currentEventId);
             if(!ev.drivers) ev.drivers = [];
             
-            // Speichere die Endzeit in der Veranstaltung
             if(endTime) ev.endTime = endTime; 
             
             ev.drivers.push({ name, duty, attends });
@@ -297,10 +302,9 @@
             renderDriverList(ev);
             renderEvents(); 
 
-            // Setze das Dropdown zurÃ¼ck, schlieÃŸe das Modal aber um zu zeigen, dass die Zeit Ã¼bernommen wurde
             document.getElementById('driverName').value = '';
             closeModal();
-            openModal(currentEventId); // Modal mit aktualisierter Zeit neu laden
+            openModal(currentEventId); 
         }
 
         function removeDriver(index) {
@@ -318,9 +322,9 @@
             let startZeit = ev.uhrzeit ? String(ev.uhrzeit) : "";
             if(startZeit && !startZeit.includes('Uhr')) startZeit += ' Uhr';
             
-            const endeText = ev.endTime ? `Ende ca.: ${ev.endTime} Uhr` : "Ende: nach RÃ¼cksprache";
+            const endeText = ev.endTime ? `Ende ca.: ${ev.endTime} Uhr` : "Ende: nach Rücksprache";
 
-            const text = `Hallo ${d.name},\nhier sind deine Einsatzdaten fÃ¼r das Bergtheater:\n\nVeranstaltung: ${ev.name}\nDatum: ${ev.datum}\nBeginn: ${startZeit}\n${endeText}\n\nDein Dienst: ${d.duty}\nBesuch der Veranstaltung: ${d.attends}\n\nBitte bestÃ¤tigen. Danke!`;
+            const text = `Hallo ${d.name},\nhier sind deine Einsatzdaten für das Bergtheater:\n\nVeranstaltung: ${ev.name}\nDatum: ${ev.datum}\nBeginn: ${startZeit}\n${endeText}\n\nDein Dienst: ${d.duty}\nBesuch der Veranstaltung: ${d.attends}\n\nBitte bestätigen. Danke!`;
 
             if (navigator.share) {
                 navigator.share({
@@ -328,7 +332,7 @@
                     text: text
                 }).catch(console.error);
             } else {
-                prompt("Dein GerÃ¤t unterstÃ¼tzt kein direktes Teilen. Bitte kopiere diesen Text:", text);
+                prompt("Dein Gerät unterstützt kein direktes Teilen. Bitte kopiere diesen Text:", text);
             }
         }
 
@@ -350,22 +354,18 @@
                 const workbook = XLSX.read(data, {type: 'array'});
                 const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
                 
-                // Liest die Daten OHNE auf die Spaltennamen zu achten, sondern nimmt die Reihenfolge
                 const jsonData = XLSX.utils.sheet_to_json(firstSheet, {header: 1, raw: false});
 
                 let importedCount = 0;
-                // Startet bei Zeile 1 (Ã¼berspringt die Ãœberschrift in Zeile 0)
                 for (let i = 1; i < jsonData.length; i++) {
                     const row = jsonData[i];
-                    
-                    // Nimmt Spalte A, B, C und D basierend auf der Position
                     if (row[0] && row[1] && row[2]) {
                         events.push({
                             id: generateId(),
                             name: row[0],
                             datum: formatExcelDate(row[1]),
                             uhrzeit: row[2],
-                            endTime: row[3] || '', // Spalte D (Ende) ist optional
+                            endTime: row[3] || '',
                             drivers: []
                         });
                         importedCount++;
@@ -378,7 +378,7 @@
                     renderEvents();
                     alert(importedCount + " Veranstaltungen erfolgreich importiert!");
                 } else {
-                    alert("Konnte keine Daten finden. Bitte prÃ¼fe, ob deine Tabelle in Spalte A beginnt.");
+                    alert("Konnte keine Daten finden. Bitte prüfe, ob deine Tabelle in Spalte A beginnt.");
                 }
             };
             reader.readAsArrayBuffer(file);
@@ -413,7 +413,7 @@
                         renderEvents();
                         alert("Backup erfolgreich geladen!");
                     } else {
-                        alert("UngÃ¼ltige Backup-Datei.");
+                        alert("Ungültige Backup-Datei.");
                     }
                 } catch(err) {
                     alert("Fehler beim Lesen der Backup-Datei.");
