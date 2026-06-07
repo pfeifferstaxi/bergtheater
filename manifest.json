@@ -1,7 +1,7 @@
 {
   "name": "Bergtheater Fahrer-Planer",
-  "short_name": "Fahrer-Planer",
-  "description": "Planungstool und Fahrer-Einteilung für das Bergtheater",
+  "short_name": "Bergtheater-Fahrer-Planer",
+  "description": "Planungstool und Fahrer-Einteilung fÃ¼r das Bergtheater",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#f1f5f9",
