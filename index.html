@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Bergtheater-Planer</title>
+    <title>Bergtheater Fahrer-Planer</title>
     
     <link rel="manifest" href="./manifest.json">
     <meta name="theme-color" content="#4f46e5">
@@ -104,8 +104,13 @@
 <body class="bg-slate-100 text-slate-800 font-sans pb-20">
 
     <header class="bg-indigo-600 text-white p-4 shadow-md sticky top-0 z-10 no-print">
-        <h1 class="text-xl font-bold text-center mb-4"><i class="fa-solid fa-van-shuttle mr-2"></i> Bergtheater-Fahrer-Planer</h1>
-        <div class="grid grid-cols-5 gap-2 text-xs">
+        <h1 class="text-xl font-bold text-center mb-4"><i class="fa-solid fa-van-shuttle mr-2"></i> Fahrer-Planer</h1>
+        <div class="grid grid-cols-3 sm:grid-cols-6 gap-2 text-xs">
+            
+            <button onclick="addEventManually()" class="bg-green-500 hover:bg-green-400 p-2 rounded flex flex-col items-center justify-center transition">
+                <i class="fa-solid fa-plus text-lg mb-1"></i> <span class="text-center">Event<br>Eintragen</span>
+            </button>
+
             <button onclick="document.getElementById('excelUpload').click()" class="bg-indigo-500 hover:bg-indigo-400 p-2 rounded flex flex-col items-center justify-center transition">
                 <i class="fa-solid fa-file-excel text-lg mb-1"></i> <span class="text-center">Excel<br>Import</span>
             </button>
@@ -270,7 +275,7 @@
             container.innerHTML = '';
 
             if(events.length === 0) {
-                container.innerHTML = '<div class="text-center text-slate-400 mt-10"><i class="fa-regular fa-calendar-xmark text-4xl mb-3"></i><p>Keine Veranstaltungen vorhanden.<br>Bitte Excel importieren.</p></div>';
+                container.innerHTML = '<div class="text-center text-slate-400 mt-10"><i class="fa-regular fa-calendar-xmark text-4xl mb-3"></i><p>Keine Veranstaltungen vorhanden.<br>Bitte Excel importieren oder manuell eintragen.</p></div>';
                 return;
             }
 
@@ -483,6 +488,27 @@
 
         function generateId() {
             return Math.random().toString(36).substr(2, 9);
+        }
+
+        function addEventManually() {
+            const name = prompt("Name der Veranstaltung:");
+            if (!name) return;
+            const datum = prompt("Datum (z.B. 15.06.2024):");
+            if (!datum) return;
+            const uhrzeit = prompt("Uhrzeit (z.B. 18:30):");
+            
+            events.push({
+                id: generateId(),
+                name: name,
+                datum: datum,
+                uhrzeit: uhrzeit || '',
+                endTime: '',
+                drivers: []
+            });
+            
+            saveData();
+            cleanUpOldEvents();
+            renderEvents();
         }
 
         function handleExcelImport(e) {
