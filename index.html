@@ -123,6 +123,18 @@
             return excelDate; 
         }
 
+        // Neue Funktion zur Ermittlung des Wochentags
+        function getWochentag(datumString) {
+            if (!datumString) return '';
+            const parts = datumString.split('.');
+            if (parts.length === 3) {
+                const dateObj = new Date(parts[2], parts[1] - 1, parts[0]);
+                const tage = ['So.', 'Mo.', 'Di.', 'Mi.', 'Do.', 'Fr.', 'Sa.'];
+                return tage[dateObj.getDay()];
+            }
+            return '';
+        }
+
         window.onload = () => {
             initDropdown();
             
@@ -200,6 +212,10 @@
                     uhrzeitAnzeige += ` - ${endZeit}`;
                 }
 
+                // Wochentag ermitteln und Datum zusammensetzen
+                const wochentag = getWochentag(ev.datum);
+                const datumAnzeige = wochentag ? `${wochentag} ${ev.datum}` : ev.datum;
+
                 const card = document.createElement('div');
                 card.className = "event-card bg-white p-4 rounded-xl shadow-sm border border-slate-200 cursor-pointer hover:border-indigo-400 transition";
                 card.onclick = () => openModal(ev.id);
@@ -209,7 +225,7 @@
                         <button onclick="deleteEvent('${ev.id}', event)" class="text-red-400 hover:text-red-600 px-2 no-print"><i class="fa-solid fa-trash-can"></i></button>
                     </div>
                     <div class="text-sm text-slate-600 mb-3 font-medium">
-                        <i class="fa-regular fa-calendar text-indigo-500 mr-1"></i> ${ev.datum} | 
+                        <i class="fa-regular fa-calendar text-indigo-500 mr-1"></i> ${datumAnzeige} | 
                         <i class="fa-regular fa-clock text-indigo-500 mr-1"></i> ${uhrzeitAnzeige}
                     </div>
                     <div class="border-t pt-3 mt-2">
@@ -252,8 +268,12 @@
                 modalUhrzeit += ` - ${endZeitModal}`;
             }
 
+            // Wochentag auch im Modal anzeigen
+            const wochentag = getWochentag(ev.datum);
+            const datumAnzeige = wochentag ? `${wochentag} ${ev.datum}` : ev.datum;
+
             document.getElementById('modalTitle').innerText = ev.name;
-            document.getElementById('modalDateTime').innerText = `${ev.datum} ab ${modalUhrzeit}`;
+            document.getElementById('modalDateTime').innerText = `${datumAnzeige} ab ${modalUhrzeit}`;
             
             document.getElementById('driverName').value = '';
             document.getElementById('endTime').value = ev.endTime || '';
@@ -342,7 +362,11 @@
                 endeText = `Ende ca.: ${endZeitShare}`;
             }
 
-            const text = `Hallo ${d.name},\nhier sind deine Einsatzdaten für das Bergtheater:\n\nVeranstaltung: ${ev.name}\nDatum: ${ev.datum}\nBeginn: ${startZeit}\n${endeText}\n\nDein Dienst: ${d.duty}\nBesuch der Veranstaltung: ${d.attends}\n\nBitte bestätigen. Danke!`;
+            // Wochentag auch im Textfeld fürs Teilen hinzufügen
+            const wochentag = getWochentag(ev.datum);
+            const datumAnzeige = wochentag ? `${wochentag} ${ev.datum}` : ev.datum;
+
+            const text = `Hallo ${d.name},\nhier sind deine Einsatzdaten für das Bergtheater:\n\nVeranstaltung: ${ev.name}\nDatum: ${datumAnzeige}\nBeginn: ${startZeit}\n${endeText}\n\nDein Dienst: ${d.duty}\nBesuch der Veranstaltung: ${d.attends}\n\nBitte bestätigen. Danke!`;
 
             if (navigator.share) {
                 navigator.share({
