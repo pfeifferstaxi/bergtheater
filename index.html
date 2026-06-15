@@ -51,7 +51,7 @@
             </button>
             <input type="file" id="backupUpload" accept=".json, application/json, text/plain, */*" class="hidden" onchange="handleBackupImport(event)">
             <button onclick="deleteAllEvents()" class="bg-red-500 hover:bg-red-400 p-2 rounded flex flex-col items-center justify-center transition">
-                <i class="fa-solid fa-trash-can text-lg mb-1"></i> <span class="text-center">Alle<br>LÃ¶schen</span>
+                <i class="fa-solid fa-trash-can text-lg mb-1"></i> <span class="text-center">Alle<br>Löschen</span>
             </button>
             <button onclick="window.print()" class="bg-indigo-500 hover:bg-indigo-400 p-2 rounded flex flex-col items-center justify-center transition">
                 <i class="fa-solid fa-print text-lg mb-1"></i> <span class="text-center">Liste<br>Drucken</span>
@@ -75,13 +75,13 @@
                 <div id="driverList" class="space-y-3 mb-6"></div>
                 <div class="modal-no-print">
                     <hr class="my-4 border-slate-200">
-                    <h3 class="font-semibold text-indigo-600 mb-3"><i class="fa-solid fa-user-plus mr-1"></i> Weiteren Fahrer hinzufÃ¼gen</h3>
+                    <h3 class="font-semibold text-indigo-600 mb-3"><i class="fa-solid fa-user-plus mr-1"></i> Weiteren Fahrer hinzufügen</h3>
                     <div class="space-y-3 bg-slate-50 p-3 rounded-lg border">
                         <select id="driverName" class="w-full p-2 border rounded focus:ring-2 focus:ring-indigo-500 outline-none bg-white"></select>
                         <div class="grid grid-cols-2 gap-2 text-sm">
                             <label class="flex items-center space-x-2 bg-white p-2 rounded border"><input type="radio" name="duty" value="Hinfahrt" class="text-indigo-600"> <span>Hinfahrt</span></label>
-                            <label class="flex items-center space-x-2 bg-white p-2 rounded border"><input type="radio" name="duty" value="RÃ¼ckfahrt" class="text-indigo-600"> <span>RÃ¼ckfahrt</span></label>
-                            <label class="flex items-center space-x-2 bg-white p-2 rounded border col-span-2"><input type="radio" name="duty" value="Hin- und RÃ¼ckfahrt" checked class="text-indigo-600"> <span>Hin- & RÃ¼ckfahrt</span></label>
+                            <label class="flex items-center space-x-2 bg-white p-2 rounded border"><input type="radio" name="duty" value="Rückfahrt" class="text-indigo-600"> <span>Rückfahrt</span></label>
+                            <label class="flex items-center space-x-2 bg-white p-2 rounded border col-span-2"><input type="radio" name="duty" value="Hin- und Rückfahrt" checked class="text-indigo-600"> <span>Hin- & Rückfahrt</span></label>
                         </div>
                         <div class="text-sm font-medium mt-2">Besucht die Veranstaltung?</div>
                         <div class="flex space-x-4 text-sm">
@@ -92,7 +92,7 @@
                             <input type="time" id="endTime" class="w-full p-2 border rounded" title="Gibt das Ende der Veranstaltung an">
                             <span class="text-xs text-slate-500 self-center">Endzeit eintragen (optional)</span>
                         </div>
-                        <button onclick="addDriver()" class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded mt-2 transition">Fahrer speichern & hinzufÃ¼gen</button>
+                        <button onclick="addDriver()" class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded mt-2 transition">Fahrer speichern & hinzufügen</button>
                     </div>
                 </div>
             </div>
@@ -100,80 +100,325 @@
     </div>
 
     <script>
-        const fahrerNamen = ["Marco Pfeiffer", "Michaela LÃ¼ders", "Michael LÃ¼ders", "Kevin Gawe", "Tommy Wall", "Nicole Ritzrau", "Kimberley", "Uwe Busse", "Thomas Kaufmann"];
+        const fahrerNamen = ["Marco Pfeiffer", "Michaela Lüders", "Michael Lüders", "Kevin Gawe", "Tommy Wall", "Nicole Ritzrau", "Kimberley", "Uwe Busse", "Thomas Kaufmann"];
         
+        // Liste MIT detaillierten Tourbezeichnungen
         const geladeneVeranstaltungen = [
-            { id: "v_1", name: "voXXclub â€“ Lederhos'n Inferno", datum: "12.06.2026", uhrzeit: "20:00", endTime: "22:30", drivers: [] },
-            { id: "v_2", name: "Spider Murphy Gang", datum: "13.06.2026", uhrzeit: "20:00", endTime: "22:30", drivers: [] },
-            { id: "v_3", name: "Remode â€“ Depeche Mode Tribute", datum: "14.06.2026", uhrzeit: "19:30", endTime: "22:00", drivers: [] },
-            { id: "v_4", name: "Philipp Poisel â€“ Freunde Tour", datum: "18.06.2026", uhrzeit: "19:30", endTime: "21:30", drivers: [] },
-            { id: "v_5", name: "KARAT â€“ Live 2026", datum: "19.06.2026", uhrzeit: "20:00", endTime: "22:30", drivers: [] },
-            { id: "v_6", name: "Walpurga â€“ Das Musical", datum: "27.06.2026", uhrzeit: "20:00", endTime: "23:00", drivers: [] },
-            { id: "v_7", name: "Walpurga â€“ Das Musical", datum: "03.07.2026", uhrzeit: "20:00", endTime: "23:00", drivers: [] },
-            { id: "v_8", name: "Walpurga â€“ Das Musical", datum: "04.07.2026", uhrzeit: "20:00", endTime: "23:00", drivers: [] },
-            { id: "v_9", name: "Walpurga â€“ Das Musical", datum: "11.07.2026", uhrzeit: "20:00", endTime: "23:00", drivers: [] },
-            { id: "v_10", name: "ABBA Diamonds Tribute", datum: "17.07.2026", uhrzeit: "20:00", endTime: "22:00", drivers: [] },
-            { id: "v_11", name: "NordbÃ¶hmische Philharmonie", datum: "18.07.2026", uhrzeit: "18:00", endTime: "20:00", drivers: [] },
-            { id: "v_12", name: "Heino â€“ Made in Germany", datum: "19.07.2026", uhrzeit: "17:00", endTime: "19:00", drivers: [] },
-            { id: "v_13", name: "Bonnie Tyler", datum: "21.07.2026", uhrzeit: "20:00", endTime: "22:00", drivers: [] },
-            { id: "v_14", name: "Walpurga â€“ Das Musical", datum: "24.07.2026", uhrzeit: "20:00", endTime: "23:00", drivers: [] },
-            { id: "v_15", name: "Walpurga â€“ Das Musical", datum: "25.07.2026", uhrzeit: "20:00", endTime: "23:00", drivers: [] },
-            { id: "v_16", name: "Walpurga â€“ Das Musical", datum: "26.07.2026", uhrzeit: "20:00", endTime: "23:00", drivers: [] },
-            { id: "v_17", name: "VNV Nation & IAMX", datum: "31.07.2026", uhrzeit: "19:30", endTime: "23:30", drivers: [] },
-            { id: "v_18", name: "VNV Nation & IAMX", datum: "01.08.2026", uhrzeit: "17:15", endTime: "23:30", drivers: [] },
+            { id: "v_1", name: "voXXclub – Lederhos'n Inferno Tour 2026", datum: "12.06.2026", uhrzeit: "20:00", endTime: "22:30", drivers: [] },
+            { id: "v_2", name: "Spider Murphy Gang – Rock'n'Roll Tour 2026", datum: "13.06.2026", uhrzeit: "20:00", endTime: "22:30", drivers: [] },
+            { id: "v_3", name: "Remode – The Music of Depeche Mode", datum: "14.06.2026", uhrzeit: "19:30", endTime: "22:00", drivers: [] },
+            { id: "v_4", name: "Philipp Poisel & Band – Freunde Tour 2026", datum: "18.06.2026", uhrzeit: "19:30", endTime: "21:30", drivers: [] },
+            { id: "v_5", name: "KARAT – Tour 2026", datum: "19.06.2026", uhrzeit: "20:00", endTime: "22:30", drivers: [] },
+            { id: "v_6", name: "Walpurga – Das Musical", datum: "27.06.2026", uhrzeit: "20:00", endTime: "23:00", drivers: [] },
+            { id: "v_7", name: "Walpurga – Das Musical", datum: "03.07.2026", uhrzeit: "20:00", endTime: "23:00", drivers: [] },
+            { id: "v_8", name: "Walpurga – Das Musical", datum: "04.07.2026", uhrzeit: "20:00", endTime: "23:00", drivers: [] },
+            { id: "v_9", name: "Walpurga – Das Musical", datum: "11.07.2026", uhrzeit: "20:00", endTime: "23:00", drivers: [] },
+            { id: "v_10", name: "ABBA Diamonds – The ABBA Tribute Show", datum: "17.07.2026", uhrzeit: "20:00", endTime: "22:00", drivers: [] },
+            { id: "v_11", name: "Nordböhmische Philharmonie – Böhse Onkelz Tribute", datum: "18.07.2026", uhrzeit: "18:00", endTime: "20:00", drivers: [] },
+            { id: "v_12", name: "Heino – Made in Germany Tour", datum: "19.07.2026", uhrzeit: "17:00", endTime: "19:00", drivers: [] },
+            { id: "v_13", name: "Bonnie Tyler Live", datum: "21.07.2026", uhrzeit: "20:00", endTime: "22:00", drivers: [] },
+            { id: "v_14", name: "Walpurga – Das Musical", datum: "24.07.2026", uhrzeit: "20:00", endTime: "23:00", drivers: [] },
+            { id: "v_15", name: "Walpurga – Das Musical", datum: "25.07.2026", uhrzeit: "20:00", endTime: "23:00", drivers: [] },
+            { id: "v_16", name: "Walpurga – Das Musical", datum: "26.07.2026", uhrzeit: "20:00", endTime: "23:00", drivers: [] },
+            { id: "v_17", name: "Unter dem Himmel – VNV Nation & IAMX", datum: "31.07.2026", uhrzeit: "19:30", endTime: "23:30", drivers: [] },
+            { id: "v_18", name: "Unter dem Himmel – VNV Nation & IAMX", datum: "01.08.2026", uhrzeit: "17:15", endTime: "23:30", drivers: [] },
             { id: "v_19", name: "Harzer Popschlager Open Air", datum: "08.08.2026", uhrzeit: "20:00", endTime: "23:30", drivers: [] },
-            { id: "v_20", name: "Die Prinzen", datum: "09.08.2026", uhrzeit: "19:00", endTime: "21:30", drivers: [] },
+            { id: "v_20", name: "Die Prinzen mit Band", datum: "09.08.2026", uhrzeit: "19:00", endTime: "21:30", drivers: [] },
             { id: "v_21", name: "Das Filmmusikkonzert", datum: "13.08.2026", uhrzeit: "19:00", endTime: "22:00", drivers: [] },
-            { id: "v_22", name: "Saltatio Mortis", datum: "14.08.2026", uhrzeit: "19:00", endTime: "22:00", drivers: [] },
-            { id: "v_23", name: "Maggie Reilly", datum: "15.08.2026", uhrzeit: "19:30", endTime: "21:30", drivers: [] },
-            { id: "v_24", name: "VÃ¶lkerball (Rammstein Tribute)", datum: "21.08.2026", uhrzeit: "20:30", endTime: "22:30", drivers: [] },
-            { id: "v_25", name: "MÃ¼nchener Freiheit", datum: "22.08.2026", uhrzeit: "20:00", endTime: "22:00", drivers: [] },
+            { id: "v_22", name: "Saltatio Mortis – Tour", datum: "14.08.2026", uhrzeit: "19:00", endTime: "22:00", drivers: [] },
+            { id: "v_23", name: "Maggie Reilly Live", datum: "15.08.2026", uhrzeit: "19:30", endTime: "21:30", drivers: [] },
+            { id: "v_24", name: "Völkerball – A Tribute to Rammstein", datum: "21.08.2026", uhrzeit: "20:30", endTime: "22:30", drivers: [] },
+            { id: "v_25", name: "Münchener Freiheit", datum: "22.08.2026", uhrzeit: "20:00", endTime: "22:00", drivers: [] },
             { id: "v_26", name: "My Fair Lady", datum: "24.08.2026", uhrzeit: "20:00", endTime: "22:30", drivers: [] },
             { id: "v_27", name: "Helge Schneider", datum: "26.08.2026", uhrzeit: "20:00", endTime: "22:00", drivers: [] },
-            { id: "v_28", name: "Walpurga â€“ Das Musical", datum: "28.08.2026", uhrzeit: "20:00", endTime: "23:00", drivers: [] },
-            { id: "v_29", name: "Walpurga â€“ Das Musical", datum: "29.08.2026", uhrzeit: "20:00", endTime: "23:00", drivers: [] },
-            { id: "v_30", name: "Scottish Music Parade", datum: "31.08.2026", uhrzeit: "20:00", endTime: "22:00", drivers: [] },
+            { id: "v_28", name: "Walpurga – Das Musical", datum: "28.08.2026", uhrzeit: "20:00", endTime: "23:00", drivers: [] },
+            { id: "v_29", name: "Walpurga – Das Musical", datum: "29.08.2026", uhrzeit: "20:00", endTime: "23:00", drivers: [] },
+            { id: "v_30", name: "The Scottish Music Parade", datum: "31.08.2026", uhrzeit: "20:00", endTime: "22:00", drivers: [] },
             { id: "v_31", name: "Silly mit Julia Neigel", datum: "05.09.2026", uhrzeit: "20:00", endTime: "22:30", drivers: [] },
-            { id: "v_32", name: "Walpurga â€“ Das Musical", datum: "10.09.2026", uhrzeit: "20:00", endTime: "23:00", drivers: [] },
-            { id: "v_33", name: "Walpurga â€“ Das Musical", datum: "11.09.2026", uhrzeit: "20:00", endTime: "23:00", drivers: [] },
-            { id: "v_34", name: "Walpurga â€“ Das Musical", datum: "12.09.2026", uhrzeit: "20:00", endTime: "23:00", drivers: [] },
-            { id: "v_35", name: "Invisible Touch (Genesis Tribute)", datum: "18.09.2026", uhrzeit: "19:00", endTime: "21:30", drivers: [] },
+            { id: "v_32", name: "Walpurga – Das Musical", datum: "10.09.2026", uhrzeit: "20:00", endTime: "23:00", drivers: [] },
+            { id: "v_33", name: "Walpurga – Das Musical", datum: "11.09.2026", uhrzeit: "20:00", endTime: "23:00", drivers: [] },
+            { id: "v_34", name: "Walpurga – Das Musical", datum: "12.09.2026", uhrzeit: "20:00", endTime: "23:00", drivers: [] },
+            { id: "v_35", name: "Invisible Touch – Phil Collins Tribute", datum: "18.09.2026", uhrzeit: "19:00", endTime: "21:30", drivers: [] },
             { id: "v_37", name: "Thomas Anders sings Modern Talking", datum: "19.09.2026", uhrzeit: "19:00", endTime: "21:30", drivers: [] },
             { id: "v_36", name: "Sophia", datum: "20.09.2026", uhrzeit: "19:00", endTime: "21:00", drivers: [] }
         ];
 
         let events = JSON.parse(localStorage.getItem('bergtheater_events')) || [];
 
+        // Automatische Duplikat-Bereinigung:
+        // Prüft, ob Events mit gleichem Datum vorhanden sind und behält den längeren Namen (Tourbezeichnung).
+        const uniqueEvents = [];
+        events.forEach(ev => {
+            const existing = uniqueEvents.find(e => e.datum === ev.datum && e.uhrzeit === ev.uhrzeit);
+            if (existing) {
+                // Den detaillierten Namen bevorzugen
+                if (ev.name.length > existing.name.length) {
+                    existing.name = ev.name;
+                }
+                // Fahrer aus Duplikaten sichern und übernehmen
+                if (ev.drivers && ev.drivers.length > 0) {
+                    ev.drivers.forEach(d => {
+                        if (!existing.drivers.find(ed => ed.name === d.name)) {
+                            existing.drivers.push(d);
+                        }
+                    });
+                }
+            } else {
+                uniqueEvents.push(ev);
+            }
+        });
+        events = uniqueEvents;
+
+        // Neue Events aus dem Code laden, ohne Duplikate zu erzeugen
         geladeneVeranstaltungen.forEach(neuEvent => {
-            if (!events.find(e => e.name === neuEvent.name && e.datum === neuEvent.datum)) {
+            const existing = events.find(e => e.datum === neuEvent.datum && e.uhrzeit === neuEvent.uhrzeit);
+            if (!existing) {
                 events.push(neuEvent);
+            } else {
+                // Name aktualisieren, falls lokal noch die alte/kurze Version gespeichert ist
+                existing.name = neuEvent.name;
+                if (!existing.endTime && neuEvent.endTime) {
+                    existing.endTime = neuEvent.endTime;
+                }
             }
         });
 
-        // ... (Restlicher Code bleibt identisch zur bisherigen Struktur)
         let currentEventId = null;
-        function formatExcelDate(excelDate) { const num = Number(excelDate); if (!isNaN(num) && num > 30000 && num < 70000) { const date = new Date(Math.round((num - 25569) * 86400 * 1000)); return date.toLocaleDateString('de-DE', {day: '2-digit', month: '2-digit', year: 'numeric'}); } return excelDate; }
-        function getWochentag(datumString) { if (!datumString) return ''; const parts = datumString.split('.'); if (parts.length === 3) { const dateObj = new Date(parts[2], parts[1] - 1, parts[0]); const tage = ['So.', 'Mo.', 'Di.', 'Mi.', 'Do.', 'Fr.', 'Sa.']; return tage[dateObj.getDay()]; } return ''; }
-        window.onload = () => { initDropdown(); if ('serviceWorker' in navigator) { navigator.serviceWorker.register('./sw.js').catch(err => console.error(err)); } events = events.map(ev => { if (ev.datum && !ev.datum.includes('.')) { ev.datum = formatExcelDate(ev.datum); } return ev; }); saveData(); cleanUpOldEvents(); renderEvents(); };
-        function initDropdown() { const select = document.getElementById('driverName'); let optionsHTML = '<option value="">-- Bitte Fahrer auswÃ¤hlen --</option>'; fahrerNamen.sort().forEach(name => { optionsHTML += `<option value="${name}">${name}</option>`; }); select.innerHTML = optionsHTML; }
-        function cleanUpOldEvents() { const today = new Date(); today.setHours(0, 0, 0, 0); events = events.filter(ev => { const parts = ev.datum.split('.'); if(parts.length === 3) { const eventDate = new Date(parts[2], parts[1] - 1, parts[0]); return eventDate >= today; } return true; }); saveData(); }
-        function renderEvents() { const container = document.getElementById('eventList'); container.innerHTML = ''; if(events.length === 0) { container.innerHTML = '<div class="text-center text-slate-400 mt-10"><i class="fa-regular fa-calendar-xmark text-4xl mb-3"></i><p>Keine Veranstaltungen vorhanden.</p></div>'; return; }
-            events.sort((a,b) => { const pa = a.datum.split('.'), pb = b.datum.split('.'); return new Date(pa[2], pa[1]-1, pa[0]) - new Date(pb[2], pb[1]-1, pb[0]); });
-            events.forEach(ev => { const driverNames = ev.drivers && ev.drivers.length > 0 ? ev.drivers.map(d => `<span class="bg-indigo-100 text-indigo-800 text-xs px-2 py-1 rounded inline-block mr-1 mb-1"><i class="fa-solid fa-user mr-1"></i>${d.name}</span>`).join('') : '<span class="text-slate-400 text-xs italic">Noch keine Fahrer</span>';
-            let uhrzeitAnzeige = ev.uhrzeit ? String(ev.uhrzeit) : ""; if (uhrzeitAnzeige && !uhrzeitAnzeige.includes('Uhr')) uhrzeitAnzeige += ' Uhr'; if (ev.endTime) { let endZeit = String(ev.endTime); if (!endZeit.includes('Uhr')) endZeit += ' Uhr'; uhrzeitAnzeige += ` - ${endZeit}`; }
-            const card = document.createElement('div'); card.className = "event-card bg-white p-4 rounded-xl shadow-sm border border-slate-200 cursor-pointer hover:border-indigo-400 transition"; card.onclick = () => openModal(ev.id); card.innerHTML = `<div class="flex justify-between items-start mb-2"><h3 class="font-bold text-lg leading-tight text-slate-800">${ev.name}</h3><button onclick="deleteEvent('${ev.id}', event)" class="text-red-400 hover:text-red-600 px-2 no-print"><i class="fa-solid fa-trash-can"></i></button></div><div class="text-sm text-slate-600 mb-3 font-medium"><i class="fa-regular fa-calendar text-indigo-500 mr-1"></i> ${getWochentag(ev.datum)} ${ev.datum} | <i class="fa-regular fa-clock text-indigo-500 mr-1"></i> ${uhrzeitAnzeige}</div><div class="border-t pt-3 mt-2">${driverNames}</div>`; container.appendChild(card); }); }
-        function deleteEvent(id, e) { e.stopPropagation(); if(confirm("Veranstaltung lÃ¶schen?")) { events = events.filter(ev => ev.id !== id); saveData(); renderEvents(); } }
-        function deleteAllEvents() { if(confirm("ALLES lÃ¶schen?")) { events = []; saveData(); renderEvents(); } }
-        function openModal(id) { currentEventId = id; const ev = events.find(e => e.id === id); document.getElementById('modalTitle').innerText = ev.name; document.getElementById('modalDateTime').innerText = `${ev.datum} ab ${ev.uhrzeit} Uhr`; document.getElementById('driverName').value = ''; document.getElementById('endTime').value = ev.endTime || ''; renderDriverList(ev); document.getElementById('eventModal').classList.remove('hidden'); }
-        function closeModal() { document.getElementById('eventModal').classList.add('hidden'); currentEventId = null; }
-        function printModal() { document.body.classList.add('print-modal-mode'); window.print(); setTimeout(() => document.body.classList.remove('print-modal-mode'), 500); }
-        function renderDriverList(ev) { const container = document.getElementById('driverList'); container.innerHTML = ''; ev.drivers?.forEach((d, index) => { const div = document.createElement('div'); div.className = "bg-white border rounded-lg p-3 flex justify-between"; div.innerHTML = `<div><div class="font-bold">${d.name}</div><div class="text-xs">Fahrt: ${d.duty} | Besuch: ${d.attends}</div></div><button onclick="removeDriver(${index})" class="text-red-600"><i class="fa-solid fa-trash"></i></button>`; container.appendChild(div); }); }
-        function addDriver() { const name = document.getElementById('driverName').value; if(!name) return; const ev = events.find(e => e.id === currentEventId); if(!ev.drivers) ev.drivers = []; ev.drivers.push({ name, duty: document.querySelector('input[name="duty"]:checked').value, attends: document.querySelector('input[name="attends"]:checked').value }); saveData(); renderDriverList(ev); renderEvents(); }
-        function removeDriver(index) { const ev = events.find(e => e.id === currentEventId); ev.drivers.splice(index, 1); saveData(); renderDriverList(ev); renderEvents(); }
-        function saveData() { localStorage.setItem('bergtheater_events', JSON.stringify(events)); }
-        function handleExcelImport(e) { /* ... (Logik bleibt identisch) ... */ }
-        function exportBackup() { const dataStr = JSON.stringify(events); const blob = new Blob([dataStr], { type: "application/json" }); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = `Backup_${new Date().toISOString().split('T')[0]}.json`; a.click(); }
-        function handleBackupImport(e) { const file = e.target.files[0]; if(!file) return; const reader = new FileReader(); reader.onload = function(e) { try { events = JSON.parse(e.target.result); saveData(); renderEvents(); } catch(err) { alert("Fehler"); } }; reader.readAsText(file); }
+
+        function formatExcelDate(excelDate) { 
+            const num = Number(excelDate); 
+            if (!isNaN(num) && num > 30000 && num < 70000) { 
+                const date = new Date(Math.round((num - 25569) * 86400 * 1000)); 
+                return date.toLocaleDateString('de-DE', {day: '2-digit', month: '2-digit', year: 'numeric'}); 
+            } 
+            return excelDate; 
+        }
+
+        function getWochentag(datumString) { 
+            if (!datumString) return ''; 
+            const parts = datumString.split('.'); 
+            if (parts.length === 3) { 
+                const dateObj = new Date(parts[2], parts[1] - 1, parts[0]); 
+                const tage = ['So.', 'Mo.', 'Di.', 'Mi.', 'Do.', 'Fr.', 'Sa.']; 
+                return tage[dateObj.getDay()]; 
+            } 
+            return ''; 
+        }
+
+        window.onload = () => { 
+            initDropdown(); 
+            if ('serviceWorker' in navigator) { 
+                navigator.serviceWorker.register('./sw.js').catch(err => console.error(err)); 
+            } 
+            events = events.map(ev => { 
+                if (ev.datum && !ev.datum.includes('.')) { 
+                    ev.datum = formatExcelDate(ev.datum); 
+                } 
+                return ev; 
+            }); 
+            saveData(); 
+            cleanUpOldEvents(); 
+            renderEvents(); 
+        };
+
+        function initDropdown() { 
+            const select = document.getElementById('driverName'); 
+            let optionsHTML = '<option value="">-- Bitte Fahrer auswählen --</option>'; 
+            fahrerNamen.sort().forEach(name => { 
+                optionsHTML += `<option value="${name}">${name}</option>`; 
+            }); 
+            select.innerHTML = optionsHTML; 
+        }
+
+        function cleanUpOldEvents() { 
+            const today = new Date(); 
+            today.setHours(0, 0, 0, 0); 
+            events = events.filter(ev => { 
+                const parts = ev.datum.split('.'); 
+                if(parts.length === 3) { 
+                    const eventDate = new Date(parts[2], parts[1] - 1, parts[0]); 
+                    return eventDate >= today; 
+                } 
+                return true; 
+            }); 
+            saveData(); 
+        }
+
+        function renderEvents() { 
+            const container = document.getElementById('eventList'); 
+            container.innerHTML = ''; 
+            if(events.length === 0) { 
+                container.innerHTML = '<div class="text-center text-slate-400 mt-10"><i class="fa-regular fa-calendar-xmark text-4xl mb-3"></i><p>Keine Veranstaltungen vorhanden.</p></div>'; 
+                return; 
+            }
+            events.sort((a,b) => { 
+                const pa = a.datum.split('.'), pb = b.datum.split('.'); 
+                return new Date(pa[2], pa[1]-1, pa[0]) - new Date(pb[2], pb[1]-1, pb[0]); 
+            });
+            events.forEach(ev => { 
+                const driverNames = ev.drivers && ev.drivers.length > 0 ? ev.drivers.map(d => `<span class="bg-indigo-100 text-indigo-800 text-xs px-2 py-1 rounded inline-block mr-1 mb-1"><i class="fa-solid fa-user mr-1"></i>${d.name}</span>`).join('') : '<span class="text-slate-400 text-xs italic">Noch keine Fahrer eingeteilt</span>';
+                let uhrzeitAnzeige = ev.uhrzeit ? String(ev.uhrzeit) : ""; 
+                if (uhrzeitAnzeige && !uhrzeitAnzeige.includes('Uhr')) uhrzeitAnzeige += ' Uhr'; 
+                if (ev.endTime) { 
+                    let endZeit = String(ev.endTime); 
+                    if (!endZeit.includes('Uhr')) endZeit += ' Uhr'; 
+                    uhrzeitAnzeige += ` - ${endZeit}`; 
+                }
+                const card = document.createElement('div'); 
+                card.className = "event-card bg-white p-4 rounded-xl shadow-sm border border-slate-200 cursor-pointer hover:border-indigo-400 transition"; 
+                card.onclick = () => openModal(ev.id); 
+                card.innerHTML = `<div class="flex justify-between items-start mb-2"><h3 class="font-bold text-lg leading-tight text-slate-800">${ev.name}</h3><button onclick="deleteEvent('${ev.id}', event)" class="text-red-400 hover:text-red-600 px-2 no-print"><i class="fa-solid fa-trash-can"></i></button></div><div class="text-sm text-slate-600 mb-3 font-medium"><i class="fa-regular fa-calendar text-indigo-500 mr-1"></i> ${getWochentag(ev.datum)} ${ev.datum} | <i class="fa-regular fa-clock text-indigo-500 mr-1"></i> ${uhrzeitAnzeige}</div><div class="border-t pt-3 mt-2">${driverNames}</div>`; 
+                container.appendChild(card); 
+            }); 
+        }
+
+        function deleteEvent(id, e) { 
+            e.stopPropagation(); 
+            if(confirm("Veranstaltung löschen?")) { 
+                events = events.filter(ev => ev.id !== id); 
+                saveData(); 
+                renderEvents(); 
+            } 
+        }
+
+        function deleteAllEvents() { 
+            if(confirm("Möchtest du WIRKLICH ALLE Veranstaltungen löschen? Dies kann nicht rückgängig gemacht werden!")) { 
+                events = []; 
+                saveData(); 
+                renderEvents(); 
+            } 
+        }
+
+        function openModal(id) { 
+            currentEventId = id; 
+            const ev = events.find(e => e.id === id); 
+            document.getElementById('modalTitle').innerText = ev.name; 
+            document.getElementById('modalDateTime').innerText = `${ev.datum} ab ${ev.uhrzeit} Uhr`; 
+            document.getElementById('driverName').value = ''; 
+            document.getElementById('endTime').value = ev.endTime || ''; 
+            renderDriverList(ev); 
+            document.getElementById('eventModal').classList.remove('hidden'); 
+        }
+
+        function closeModal() { 
+            document.getElementById('eventModal').classList.add('hidden'); 
+            currentEventId = null; 
+        }
+
+        function printModal() { 
+            document.body.classList.add('print-modal-mode'); 
+            window.print(); 
+            setTimeout(() => document.body.classList.remove('print-modal-mode'), 500); 
+        }
+
+        function renderDriverList(ev) { 
+            const container = document.getElementById('driverList'); 
+            container.innerHTML = ''; 
+            ev.drivers?.forEach((d, index) => { 
+                const div = document.createElement('div'); 
+                div.className = "bg-white border rounded-lg p-3 flex justify-between"; 
+                div.innerHTML = `<div><div class="font-bold">${d.name}</div><div class="text-xs">Fahrt: ${d.duty} | Besuch: ${d.attends}</div></div><button onclick="removeDriver(${index})" class="text-red-600"><i class="fa-solid fa-trash"></i></button>`; 
+                container.appendChild(div); 
+            }); 
+        }
+
+        function addDriver() { 
+            const name = document.getElementById('driverName').value; 
+            if(!name) return; 
+            const ev = events.find(e => e.id === currentEventId); 
+            if(!ev.drivers) ev.drivers = []; 
+            ev.drivers.push({ 
+                name, 
+                duty: document.querySelector('input[name="duty"]:checked').value, 
+                attends: document.querySelector('input[name="attends"]:checked').value 
+            }); 
+            saveData(); 
+            renderDriverList(ev); 
+            renderEvents(); 
+        }
+
+        function removeDriver(index) { 
+            const ev = events.find(e => e.id === currentEventId); 
+            ev.drivers.splice(index, 1); 
+            saveData(); 
+            renderDriverList(ev); 
+            renderEvents(); 
+        }
+
+        function saveData() { 
+            localStorage.setItem('bergtheater_events', JSON.stringify(events)); 
+        }
+
+        function generateId() {
+            return Math.random().toString(36).substr(2, 9);
+        }
+
+        function handleExcelImport(e) { 
+            const file = e.target.files[0]; 
+            if(!file) return; 
+
+            const reader = new FileReader(); 
+            reader.onload = function(evt) { 
+                const data = new Uint8Array(evt.target.result); 
+                const workbook = XLSX.read(data, {type: 'array'}); 
+                const firstSheet = workbook.Sheets[workbook.SheetNames[0]]; 
+                
+                const jsonData = XLSX.utils.sheet_to_json(firstSheet, {header: 1, raw: false}); 
+
+                let importedCount = 0; 
+                for (let i = 1; i < jsonData.length; i++) { 
+                    const row = jsonData[i]; 
+                    if (row[0] && row[1] && row[2]) { 
+                        events.push({ 
+                            id: generateId(), 
+                            name: row[0], 
+                            datum: formatExcelDate(row[1]), 
+                            uhrzeit: row[2], 
+                            endTime: row[3] || '', 
+                            drivers: [] 
+                        }); 
+                        importedCount++; 
+                    } 
+                } 
+
+                if(importedCount > 0) { 
+                    saveData(); 
+                    cleanUpOldEvents(); 
+                    renderEvents(); 
+                    alert(importedCount + " Veranstaltungen erfolgreich importiert!"); 
+                } else { 
+                    alert("Konnte keine Daten finden. Bitte prüfe, ob deine Tabelle in Spalte A beginnt."); 
+                } 
+            }; 
+            reader.readAsArrayBuffer(file); 
+            e.target.value = ''; 
+        }
+
+        function exportBackup() { 
+            const dataStr = JSON.stringify(events); 
+            const blob = new Blob([dataStr], { type: "application/json" }); 
+            const url = URL.createObjectURL(blob); 
+            const a = document.createElement('a'); 
+            a.href = url; 
+            a.download = `Bergtheater_Backup_${new Date().toISOString().split('T')[0]}.json`; 
+            a.click(); 
+        }
+
+        function handleBackupImport(e) { 
+            const file = e.target.files[0]; 
+            if(!file) return; 
+            const reader = new FileReader(); 
+            reader.onload = function(e) { 
+                try { 
+                    events = JSON.parse(e.target.result); 
+                    saveData(); 
+                    renderEvents(); 
+                } catch(err) { 
+                    alert("Fehler beim Laden des Backups."); 
+                } 
+            }; 
+            reader.readAsText(file); 
+        }
     </script>
 </body>
 </html>
