@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+   <!DOCTYPE html>
 <html lang="de">
 <head>
     <meta charset="UTF-8">
@@ -51,7 +51,7 @@
             </button>
             <input type="file" id="backupUpload" accept=".json, application/json, text/plain, */*" class="hidden" onchange="handleBackupImport(event)">
             <button onclick="deleteAllEvents()" class="bg-red-500 hover:bg-red-400 p-2 rounded flex flex-col items-center justify-center transition">
-                <i class="fa-solid fa-trash-can text-lg mb-1"></i> <span class="text-center">Alle<br>Löschen</span>
+                <i class="fa-solid fa-trash-can text-lg mb-1"></i> <span class="text-center">Alle<br>LÃ¶schen</span>
             </button>
             <button onclick="window.print()" class="bg-indigo-500 hover:bg-indigo-400 p-2 rounded flex flex-col items-center justify-center transition">
                 <i class="fa-solid fa-print text-lg mb-1"></i> <span class="text-center">Liste<br>Drucken</span>
@@ -75,13 +75,13 @@
                 <div id="driverList" class="space-y-3 mb-6"></div>
                 <div class="modal-no-print">
                     <hr class="my-4 border-slate-200">
-                    <h3 class="font-semibold text-indigo-600 mb-3"><i class="fa-solid fa-user-plus mr-1"></i> Weiteren Fahrer hinzufügen</h3>
+                    <h3 class="font-semibold text-indigo-600 mb-3"><i class="fa-solid fa-user-plus mr-1"></i> Weiteren Fahrer hinzufÃ¼gen</h3>
                     <div class="space-y-3 bg-slate-50 p-3 rounded-lg border">
                         <select id="driverName" class="w-full p-2 border rounded focus:ring-2 focus:ring-indigo-500 outline-none bg-white"></select>
                         <div class="grid grid-cols-2 gap-2 text-sm">
                             <label class="flex items-center space-x-2 bg-white p-2 rounded border"><input type="radio" name="duty" value="Hinfahrt" class="text-indigo-600"> <span>Hinfahrt</span></label>
-                            <label class="flex items-center space-x-2 bg-white p-2 rounded border"><input type="radio" name="duty" value="Rückfahrt" class="text-indigo-600"> <span>Rückfahrt</span></label>
-                            <label class="flex items-center space-x-2 bg-white p-2 rounded border col-span-2"><input type="radio" name="duty" value="Hin- und Rückfahrt" checked class="text-indigo-600"> <span>Hin- & Rückfahrt</span></label>
+                            <label class="flex items-center space-x-2 bg-white p-2 rounded border"><input type="radio" name="duty" value="RÃ¼ckfahrt" class="text-indigo-600"> <span>RÃ¼ckfahrt</span></label>
+                            <label class="flex items-center space-x-2 bg-white p-2 rounded border col-span-2"><input type="radio" name="duty" value="Hin- und RÃ¼ckfahrt" checked class="text-indigo-600"> <span>Hin- & RÃ¼ckfahrt</span></label>
                         </div>
                         <div class="text-sm font-medium mt-2">Besucht die Veranstaltung?</div>
                         <div class="flex space-x-4 text-sm">
@@ -92,7 +92,7 @@
                             <input type="time" id="endTime" class="w-full p-2 border rounded" title="Gibt das Ende der Veranstaltung an">
                             <span class="text-xs text-slate-500 self-center">Endzeit eintragen (optional)</span>
                         </div>
-                        <button onclick="addDriver()" class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded mt-2 transition">Fahrer speichern & hinzufügen</button>
+                        <button onclick="addDriver()" class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded mt-2 transition">Fahrer speichern & hinzufÃ¼gen</button>
                     </div>
                 </div>
             </div>
@@ -100,89 +100,81 @@
     </div>
 
     <script>
-        const fahrerNamen = ["Marco Pfeiffer", "Michaela Lüders", "Michael Lüders", "Kevin Gawe", "Tommy Wall", "Nicole Ritzrau", "Kimberley", "Uwe Busse", "Thomas Kaufmann"];
+        const fahrerNamen = ["Marco Pfeiffer", "Michaela LÃ¼ders", "Michael LÃ¼ders", "Kevin Gawe", "Tommy Wall", "Nicole Ritzrau", "Kimberley", "Uwe Busse", "Thomas Kaufmann"];
         
-        // Liste MIT detaillierten Tourbezeichnungen
+        // Liste mit exakten Startzeiten aus dem Spielplan-PDF und bereinigten Endzeiten.
+        // Endzeiten wurden nur dort hinterlegt, wo sie offiziell im System abrufbar sind.
         const geladeneVeranstaltungen = [
-            { id: "v_1", name: "voXXclub – Lederhos'n Inferno Tour 2026", datum: "12.06.2026", uhrzeit: "20:00", endTime: "22:30", drivers: [] },
-            { id: "v_2", name: "Spider Murphy Gang – Rock'n'Roll Tour 2026", datum: "13.06.2026", uhrzeit: "20:00", endTime: "22:30", drivers: [] },
-            { id: "v_3", name: "Remode – The Music of Depeche Mode", datum: "14.06.2026", uhrzeit: "19:30", endTime: "22:00", drivers: [] },
-            { id: "v_4", name: "Philipp Poisel & Band – Freunde Tour 2026", datum: "18.06.2026", uhrzeit: "19:30", endTime: "21:30", drivers: [] },
-            { id: "v_5", name: "KARAT – Tour 2026", datum: "19.06.2026", uhrzeit: "20:00", endTime: "22:30", drivers: [] },
-            { id: "v_6", name: "Walpurga – Das Musical", datum: "27.06.2026", uhrzeit: "20:00", endTime: "23:00", drivers: [] },
-            { id: "v_7", name: "Walpurga – Das Musical", datum: "03.07.2026", uhrzeit: "20:00", endTime: "23:00", drivers: [] },
-            { id: "v_8", name: "Walpurga – Das Musical", datum: "04.07.2026", uhrzeit: "20:00", endTime: "23:00", drivers: [] },
-            { id: "v_9", name: "Walpurga – Das Musical", datum: "11.07.2026", uhrzeit: "20:00", endTime: "23:00", drivers: [] },
-            { id: "v_10", name: "ABBA Diamonds – The ABBA Tribute Show", datum: "17.07.2026", uhrzeit: "20:00", endTime: "22:00", drivers: [] },
-            { id: "v_11", name: "Nordböhmische Philharmonie – Böhse Onkelz Tribute", datum: "18.07.2026", uhrzeit: "18:00", endTime: "20:00", drivers: [] },
-            { id: "v_12", name: "Heino – Made in Germany Tour", datum: "19.07.2026", uhrzeit: "17:00", endTime: "19:00", drivers: [] },
-            { id: "v_13", name: "Bonnie Tyler Live", datum: "21.07.2026", uhrzeit: "20:00", endTime: "22:00", drivers: [] },
-            { id: "v_14", name: "Walpurga – Das Musical", datum: "24.07.2026", uhrzeit: "20:00", endTime: "23:00", drivers: [] },
-            { id: "v_15", name: "Walpurga – Das Musical", datum: "25.07.2026", uhrzeit: "20:00", endTime: "23:00", drivers: [] },
-            { id: "v_16", name: "Walpurga – Das Musical", datum: "26.07.2026", uhrzeit: "20:00", endTime: "23:00", drivers: [] },
-            { id: "v_17", name: "Unter dem Himmel – VNV Nation & IAMX", datum: "31.07.2026", uhrzeit: "19:30", endTime: "23:30", drivers: [] },
-            { id: "v_18", name: "Unter dem Himmel – VNV Nation & IAMX", datum: "01.08.2026", uhrzeit: "17:15", endTime: "23:30", drivers: [] },
-            { id: "v_19", name: "Harzer Popschlager Open Air", datum: "08.08.2026", uhrzeit: "20:00", endTime: "23:30", drivers: [] },
-            { id: "v_20", name: "Die Prinzen mit Band", datum: "09.08.2026", uhrzeit: "19:00", endTime: "21:30", drivers: [] },
-            { id: "v_21", name: "Das Filmmusikkonzert", datum: "13.08.2026", uhrzeit: "19:00", endTime: "22:00", drivers: [] },
-            { id: "v_22", name: "Saltatio Mortis – Tour", datum: "14.08.2026", uhrzeit: "19:00", endTime: "22:00", drivers: [] },
-            { id: "v_23", name: "Maggie Reilly Live", datum: "15.08.2026", uhrzeit: "19:30", endTime: "21:30", drivers: [] },
-            { id: "v_24", name: "Völkerball – A Tribute to Rammstein", datum: "21.08.2026", uhrzeit: "20:30", endTime: "22:30", drivers: [] },
-            { id: "v_25", name: "Münchener Freiheit", datum: "22.08.2026", uhrzeit: "20:00", endTime: "22:00", drivers: [] },
-            { id: "v_26", name: "My Fair Lady", datum: "24.08.2026", uhrzeit: "20:00", endTime: "22:30", drivers: [] },
-            { id: "v_27", name: "Helge Schneider", datum: "26.08.2026", uhrzeit: "20:00", endTime: "22:00", drivers: [] },
-            { id: "v_28", name: "Walpurga – Das Musical", datum: "28.08.2026", uhrzeit: "20:00", endTime: "23:00", drivers: [] },
-            { id: "v_29", name: "Walpurga – Das Musical", datum: "29.08.2026", uhrzeit: "20:00", endTime: "23:00", drivers: [] },
-            { id: "v_30", name: "The Scottish Music Parade", datum: "31.08.2026", uhrzeit: "20:00", endTime: "22:00", drivers: [] },
-            { id: "v_31", name: "Silly mit Julia Neigel", datum: "05.09.2026", uhrzeit: "20:00", endTime: "22:30", drivers: [] },
-            { id: "v_32", name: "Walpurga – Das Musical", datum: "10.09.2026", uhrzeit: "20:00", endTime: "23:00", drivers: [] },
-            { id: "v_33", name: "Walpurga – Das Musical", datum: "11.09.2026", uhrzeit: "20:00", endTime: "23:00", drivers: [] },
-            { id: "v_34", name: "Walpurga – Das Musical", datum: "12.09.2026", uhrzeit: "20:00", endTime: "23:00", drivers: [] },
-            { id: "v_35", name: "Invisible Touch – Phil Collins Tribute", datum: "18.09.2026", uhrzeit: "19:00", endTime: "21:30", drivers: [] },
-            { id: "v_37", name: "Thomas Anders sings Modern Talking", datum: "19.09.2026", uhrzeit: "19:00", endTime: "21:30", drivers: [] },
-            { id: "v_36", name: "Sophia", datum: "20.09.2026", uhrzeit: "19:00", endTime: "21:00", drivers: [] }
+            { id: "v_1", name: "voXXclub â€“ Lederhos'n Inferno Tour", datum: "12.06.2026", uhrzeit: "20:00", endTime: "22:00", drivers: [] },
+            { id: "v_2", name: "Spider Murphy Gang â€“ Rock'n'Roll Tour 2026", datum: "13.06.2026", uhrzeit: "20:00", endTime: "22:30", drivers: [] },
+            { id: "v_3", name: "Remode â€“ The Music of Depeche Mode", datum: "14.06.2026", uhrzeit: "19:00", endTime: "21:00", drivers: [] },
+            { id: "v_4", name: "Philipp Poisel & Band â€“ Freunde Tour 2026", datum: "18.06.2026", uhrzeit: "19:00", endTime: "", drivers: [] },
+            { id: "v_5", name: "KARAT â€“ Tour 2026", datum: "19.06.2026", uhrzeit: "20:00", endTime: "22:30", drivers: [] },
+            { id: "v_6", name: "Walpurga â€“ Das Musical", datum: "27.06.2026", uhrzeit: "20:00", endTime: "23:30", drivers: [] },
+            { id: "v_7", name: "Walpurga â€“ Das Musical", datum: "03.07.2026", uhrzeit: "20:00", endTime: "23:30", drivers: [] },
+            { id: "v_8", name: "Walpurga â€“ Das Musical", datum: "04.07.2026", uhrzeit: "20:00", endTime: "23:30", drivers: [] },
+            { id: "v_9", name: "Walpurga â€“ Das Musical", datum: "11.07.2026", uhrzeit: "20:00", endTime: "23:30", drivers: [] },
+            { id: "v_10", name: "ABBA Diamonds â€“ The ABBA Tribute Show", datum: "17.07.2026", uhrzeit: "20:00", endTime: "", drivers: [] },
+            { id: "v_11", name: "NordbÃ¶hmische Philharmonie Teplice â€“ BÃ¶hse Onkelz", datum: "18.07.2026", uhrzeit: "18:00", endTime: "", drivers: [] },
+            { id: "v_12", name: "Heino â€“ Made in Germany | Solo Tour", datum: "19.07.2026", uhrzeit: "17:00", endTime: "", drivers: [] },
+            { id: "v_13", name: "Bonnie Tyler", datum: "21.07.2026", uhrzeit: "20:00", endTime: "", drivers: [] },
+            { id: "v_14", name: "Walpurga â€“ Das Musical", datum: "24.07.2026", uhrzeit: "20:00", endTime: "23:30", drivers: [] },
+            { id: "v_15", name: "Walpurga â€“ Das Musical", datum: "25.07.2026", uhrzeit: "20:00", endTime: "23:30", drivers: [] },
+            { id: "v_16", name: "Walpurga â€“ Das Musical", datum: "26.07.2026", uhrzeit: "20:00", endTime: "23:30", drivers: [] },
+            { id: "v_17", name: "Unter dem Himmel â€“ Sommer Open-Air", datum: "31.07.2026", uhrzeit: "19:30", endTime: "", drivers: [] },
+            { id: "v_18", name: "Unter dem Himmel â€“ Sommer Open-Air", datum: "01.08.2026", uhrzeit: "17:15", endTime: "", drivers: [] },
+            { id: "v_19", name: "Harzer Popschlager Open Air", datum: "08.08.2026", uhrzeit: "20:00", endTime: "", drivers: [] },
+            { id: "v_20", name: "Die Prinzen mit Band", datum: "09.08.2026", uhrzeit: "19:00", endTime: "", drivers: [] },
+            { id: "v_21", name: "Filmmusik XXL mit den Harzer Sinfonikern", datum: "13.08.2026", uhrzeit: "19:00", endTime: "", drivers: [] },
+            { id: "v_22", name: "Saltatio Mortis", datum: "14.08.2026", uhrzeit: "19:00", endTime: "", drivers: [] },
+            { id: "v_23", name: "Maggie Reilly â€“ Everytime We Touch Tour", datum: "15.08.2026", uhrzeit: "19:30", endTime: "", drivers: [] },
+            { id: "v_24", name: "VÃ–LKERBALL â€“ A Tribute to Rammstein", datum: "21.08.2026", uhrzeit: "20:30", endTime: "", drivers: [] },
+            { id: "v_25", name: "MÃ¼nchener Freiheit â€“ Live & Open Air", datum: "22.08.2026", uhrzeit: "20:00", endTime: "", drivers: [] },
+            { id: "v_26", name: "Olaf Schubert und seine Freunde", datum: "26.08.2026", uhrzeit: "20:00", endTime: "", drivers: [] },
+            { id: "v_27", name: "Walpurga â€“ Das Musical", datum: "28.08.2026", uhrzeit: "20:00", endTime: "23:30", drivers: [] },
+            { id: "v_28", name: "Walpurga â€“ Das Musical", datum: "29.08.2026", uhrzeit: "20:00", endTime: "23:30", drivers: [] },
+            { id: "v_30", name: "The Scottish Music Parade", datum: "31.08.2026", uhrzeit: "20:00", endTime: "", drivers: [] },
+            { id: "v_31", name: "SILLY mit Julia Neigel â€“ elektroAkustik", datum: "05.09.2026", uhrzeit: "20:00", endTime: "", drivers: [] },
+            { id: "v_32", name: "Walpurga â€“ Das Musical", datum: "10.09.2026", uhrzeit: "20:00", endTime: "23:30", drivers: [] },
+            { id: "v_33", name: "Walpurga â€“ Das Musical", datum: "11.09.2026", uhrzeit: "20:00", endTime: "23:30", drivers: [] },
+            { id: "v_34", name: "Walpurga â€“ Das Musical", datum: "12.09.2026", uhrzeit: "20:00", endTime: "23:30", drivers: [] },
+            { id: "v_35", name: "Invisible Touch â€“ a Tribute to Phil Collins", datum: "18.09.2026", uhrzeit: "19:00", endTime: "", drivers: [] },
+            { id: "v_36", name: "Thomas Anders sings Modern Talking", datum: "19.09.2026", uhrzeit: "19:00", endTime: "", drivers: [] },
+            { id: "v_37", name: "Sophia â€“ Durch die Blume | Open Air", datum: "20.09.2026", uhrzeit: "19:00", endTime: "", drivers: [] }
         ];
 
-        let events = JSON.parse(localStorage.getItem('bergtheater_events')) || [];
+        let localEvents = JSON.parse(localStorage.getItem('bergtheater_events')) || [];
 
-        // Automatische Duplikat-Bereinigung:
-        // Prüft, ob Events mit gleichem Datum vorhanden sind und behält den längeren Namen (Tourbezeichnung).
-        const uniqueEvents = [];
-        events.forEach(ev => {
-            const existing = uniqueEvents.find(e => e.datum === ev.datum && e.uhrzeit === ev.uhrzeit);
+        // STRICT DEDUPLICATION LOGIC:
+        // Ãœberschreibt existierende lokale Events basierend auf dem DATUM.
+        // Falls ein lokales Event am selben Tag liegt, werden die Fahrer gerettet 
+        // und die neuen, sauberen Angaben Ã¼berschreiben den alten fehlerhaften Eintrag.
+        const mergedEvents = [];
+
+        geladeneVeranstaltungen.forEach(neuEvent => {
+            const freshEvent = JSON.parse(JSON.stringify(neuEvent));
+            mergedEvents.push(freshEvent);
+        });
+
+        localEvents.forEach(localEv => {
+            const existing = mergedEvents.find(e => e.datum === localEv.datum);
             if (existing) {
-                // Den detaillierten Namen bevorzugen
-                if (ev.name.length > existing.name.length) {
-                    existing.name = ev.name;
-                }
-                // Fahrer aus Duplikaten sichern und übernehmen
-                if (ev.drivers && ev.drivers.length > 0) {
-                    ev.drivers.forEach(d => {
+                // Ein lokales Event mit demselben Datum existiert. 
+                // Wir Ã¼bernehmen NUR die manuell hinzugefÃ¼gten Fahrer, nicht die falschen Uhrzeiten/Namen.
+                if (localEv.drivers && localEv.drivers.length > 0) {
+                    localEv.drivers.forEach(d => {
                         if (!existing.drivers.find(ed => ed.name === d.name)) {
                             existing.drivers.push(d);
                         }
                     });
                 }
             } else {
-                uniqueEvents.push(ev);
-            }
-        });
-        events = uniqueEvents;
-
-        // Neue Events aus dem Code laden, ohne Duplikate zu erzeugen
-        geladeneVeranstaltungen.forEach(neuEvent => {
-            const existing = events.find(e => e.datum === neuEvent.datum && e.uhrzeit === neuEvent.uhrzeit);
-            if (!existing) {
-                events.push(neuEvent);
-            } else {
-                // Name aktualisieren, falls lokal noch die alte/kurze Version gespeichert ist
-                existing.name = neuEvent.name;
-                if (!existing.endTime && neuEvent.endTime) {
-                    existing.endTime = neuEvent.endTime;
-                }
+                // Event liegt an einem Tag, an dem wir nichts vorgegeben haben (z.B. manuell importiert via Excel)
+                mergedEvents.push(localEv);
             }
         });
 
+        let events = mergedEvents;
         let currentEventId = null;
 
         function formatExcelDate(excelDate) { 
@@ -223,7 +215,7 @@
 
         function initDropdown() { 
             const select = document.getElementById('driverName'); 
-            let optionsHTML = '<option value="">-- Bitte Fahrer auswählen --</option>'; 
+            let optionsHTML = '<option value="">-- Bitte Fahrer auswÃ¤hlen --</option>'; 
             fahrerNamen.sort().forEach(name => { 
                 optionsHTML += `<option value="${name}">${name}</option>`; 
             }); 
@@ -274,7 +266,7 @@
 
         function deleteEvent(id, e) { 
             e.stopPropagation(); 
-            if(confirm("Veranstaltung löschen?")) { 
+            if(confirm("Veranstaltung lÃ¶schen?")) { 
                 events = events.filter(ev => ev.id !== id); 
                 saveData(); 
                 renderEvents(); 
@@ -282,7 +274,7 @@
         }
 
         function deleteAllEvents() { 
-            if(confirm("Möchtest du WIRKLICH ALLE Veranstaltungen löschen? Dies kann nicht rückgängig gemacht werden!")) { 
+            if(confirm("MÃ¶chtest du WIRKLICH ALLE Veranstaltungen lÃ¶schen? Dies kann nicht rÃ¼ckgÃ¤ngig gemacht werden!")) { 
                 events = []; 
                 saveData(); 
                 renderEvents(); 
@@ -387,7 +379,7 @@
                     renderEvents(); 
                     alert(importedCount + " Veranstaltungen erfolgreich importiert!"); 
                 } else { 
-                    alert("Konnte keine Daten finden. Bitte prüfe, ob deine Tabelle in Spalte A beginnt."); 
+                    alert("Konnte keine Daten finden. Bitte prÃ¼fe, ob deine Tabelle in Spalte A beginnt."); 
                 } 
             }; 
             reader.readAsArrayBuffer(file); 
