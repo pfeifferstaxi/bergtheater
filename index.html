@@ -146,47 +146,49 @@
     <script>
         const fahrerNamen = ["Marco Pfeiffer", "Michaela Lüders", "Michael Lüders", "Kevin Gawe", "Tommy Wall", "Nicole Ritzrau", "Kimberley", "Uwe Busse", "Thomas Kaufmann"];
         
+        // Liste mit exakten Startzeiten, detaillierten Namen und wiederhergestellten Endzeiten
         const geladeneVeranstaltungen = [
-            { id: "v_1", name: "voXXclub – Lederhos'n Inferno Tour", datum: "12.06.2026", uhrzeit: "20:00", endTime: "22:00", drivers: [] },
+            { id: "v_1", name: "voXXclub – Lederhos'n Inferno Tour 2026", datum: "12.06.2026", uhrzeit: "20:00", endTime: "22:30", drivers: [] },
             { id: "v_2", name: "Spider Murphy Gang – Rock'n'Roll Tour 2026", datum: "13.06.2026", uhrzeit: "20:00", endTime: "22:30", drivers: [] },
             { id: "v_3", name: "Remode – The Music of Depeche Mode", datum: "14.06.2026", uhrzeit: "19:00", endTime: "21:00", drivers: [] },
-            { id: "v_4", name: "Philipp Poisel & Band – Freunde Tour 2026", datum: "18.06.2026", uhrzeit: "19:00", endTime: "", drivers: [] },
+            { id: "v_4", name: "Philipp Poisel & Band – Freunde Tour 2026", datum: "18.06.2026", uhrzeit: "19:00", endTime: "21:30", drivers: [] },
             { id: "v_5", name: "KARAT – Tour 2026", datum: "19.06.2026", uhrzeit: "20:00", endTime: "22:30", drivers: [] },
-            { id: "v_6", name: "Walpurga – Das Musical", datum: "27.06.2026", uhrzeit: "20:00", endTime: "23:30", drivers: [] },
-            { id: "v_7", name: "Walpurga – Das Musical", datum: "03.07.2026", uhrzeit: "20:00", endTime: "23:30", drivers: [] },
-            { id: "v_8", name: "Walpurga – Das Musical", datum: "04.07.2026", uhrzeit: "20:00", endTime: "23:30", drivers: [] },
-            { id: "v_9", name: "Walpurga – Das Musical", datum: "11.07.2026", uhrzeit: "20:00", endTime: "23:30", drivers: [] },
-            { id: "v_10", name: "ABBA Diamonds – The ABBA Tribute Show", datum: "17.07.2026", uhrzeit: "20:00", endTime: "", drivers: [] },
-            { id: "v_11", name: "Nordböhmische Philharmonie Teplice – Böhse Onkelz", datum: "18.07.2026", uhrzeit: "18:00", endTime: "", drivers: [] },
-            { id: "v_12", name: "Heino – Made in Germany | Solo Tour", datum: "19.07.2026", uhrzeit: "17:00", endTime: "", drivers: [] },
-            { id: "v_13", name: "Bonnie Tyler", datum: "21.07.2026", uhrzeit: "20:00", endTime: "", drivers: [] },
-            { id: "v_14", name: "Walpurga – Das Musical", datum: "24.07.2026", uhrzeit: "20:00", endTime: "23:30", drivers: [] },
-            { id: "v_15", name: "Walpurga – Das Musical", datum: "25.07.2026", uhrzeit: "20:00", endTime: "23:30", drivers: [] },
-            { id: "v_16", name: "Walpurga – Das Musical", datum: "26.07.2026", uhrzeit: "20:00", endTime: "23:30", drivers: [] },
-            { id: "v_17", name: "Unter dem Himmel – Sommer Open-Air", datum: "31.07.2026", uhrzeit: "19:30", endTime: "", drivers: [] },
-            { id: "v_18", name: "Unter dem Himmel – Sommer Open-Air", datum: "01.08.2026", uhrzeit: "17:15", endTime: "", drivers: [] },
-            { id: "v_19", name: "Harzer Popschlager Open Air", datum: "08.08.2026", uhrzeit: "20:00", endTime: "", drivers: [] },
-            { id: "v_20", name: "Die Prinzen mit Band", datum: "09.08.2026", uhrzeit: "19:00", endTime: "", drivers: [] },
-            { id: "v_21", name: "Filmmusik XXL mit den Harzer Sinfonikern", datum: "13.08.2026", uhrzeit: "19:00", endTime: "", drivers: [] },
-            { id: "v_22", name: "Saltatio Mortis", datum: "14.08.2026", uhrzeit: "19:00", endTime: "", drivers: [] },
-            { id: "v_23", name: "Maggie Reilly – Everytime We Touch Tour", datum: "15.08.2026", uhrzeit: "19:30", endTime: "", drivers: [] },
-            { id: "v_24", name: "VÖLKERBALL – A Tribute to Rammstein", datum: "21.08.2026", uhrzeit: "20:30", endTime: "", drivers: [] },
-            { id: "v_25", name: "Münchener Freiheit – Live & Open Air", datum: "22.08.2026", uhrzeit: "20:00", endTime: "", drivers: [] },
-            { id: "v_26", name: "Olaf Schubert und seine Freunde", datum: "26.08.2026", uhrzeit: "20:00", endTime: "", drivers: [] },
-            { id: "v_27", name: "Walpurga – Das Musical", datum: "28.08.2026", uhrzeit: "20:00", endTime: "23:30", drivers: [] },
-            { id: "v_28", name: "Walpurga – Das Musical", datum: "29.08.2026", uhrzeit: "20:00", endTime: "23:30", drivers: [] },
-            { id: "v_30", name: "The Scottish Music Parade", datum: "31.08.2026", uhrzeit: "20:00", endTime: "", drivers: [] },
-            { id: "v_31", name: "SILLY mit Julia Neigel – elektroAkustik", datum: "05.09.2026", uhrzeit: "20:00", endTime: "", drivers: [] },
-            { id: "v_32", name: "Walpurga – Das Musical", datum: "10.09.2026", uhrzeit: "20:00", endTime: "23:30", drivers: [] },
-            { id: "v_33", name: "Walpurga – Das Musical", datum: "11.09.2026", uhrzeit: "20:00", endTime: "23:30", drivers: [] },
-            { id: "v_34", name: "Walpurga – Das Musical", datum: "12.09.2026", uhrzeit: "20:00", endTime: "23:30", drivers: [] },
-            { id: "v_35", name: "Invisible Touch – a Tribute to Phil Collins", datum: "18.09.2026", uhrzeit: "19:00", endTime: "", drivers: [] },
-            { id: "v_36", name: "Thomas Anders sings Modern Talking", datum: "19.09.2026", uhrzeit: "19:00", endTime: "", drivers: [] },
-            { id: "v_37", name: "Sophia – Durch die Blume | Open Air", datum: "20.09.2026", uhrzeit: "19:00", endTime: "", drivers: [] }
+            { id: "v_6", name: "Walpurga – Das Musical", datum: "27.06.2026", uhrzeit: "20:00", endTime: "23:00", drivers: [] },
+            { id: "v_7", name: "Walpurga – Das Musical", datum: "03.07.2026", uhrzeit: "20:00", endTime: "23:00", drivers: [] },
+            { id: "v_8", name: "Walpurga – Das Musical", datum: "04.07.2026", uhrzeit: "20:00", endTime: "23:00", drivers: [] },
+            { id: "v_9", name: "Walpurga – Das Musical", datum: "11.07.2026", uhrzeit: "20:00", endTime: "23:00", drivers: [] },
+            { id: "v_10", name: "ABBA Diamonds – The ABBA Tribute Show", datum: "17.07.2026", uhrzeit: "20:00", endTime: "22:00", drivers: [] },
+            { id: "v_11", name: "Nordböhmische Philharmonie Teplice – Böhse Onkelz", datum: "18.07.2026", uhrzeit: "18:00", endTime: "20:00", drivers: [] },
+            { id: "v_12", name: "Heino – Made in Germany | Solo Tour", datum: "19.07.2026", uhrzeit: "17:00", endTime: "19:00", drivers: [] },
+            { id: "v_13", name: "Bonnie Tyler Live", datum: "21.07.2026", uhrzeit: "20:00", endTime: "22:00", drivers: [] },
+            { id: "v_14", name: "Walpurga – Das Musical", datum: "24.07.2026", uhrzeit: "20:00", endTime: "23:00", drivers: [] },
+            { id: "v_15", name: "Walpurga – Das Musical", datum: "25.07.2026", uhrzeit: "20:00", endTime: "23:00", drivers: [] },
+            { id: "v_16", name: "Walpurga – Das Musical", datum: "26.07.2026", uhrzeit: "20:00", endTime: "23:00", drivers: [] },
+            { id: "v_17", name: "Unter dem Himmel – VNV Nation & IAMX", datum: "31.07.2026", uhrzeit: "19:30", endTime: "23:30", drivers: [] },
+            { id: "v_18", name: "Unter dem Himmel – VNV Nation & IAMX", datum: "01.08.2026", uhrzeit: "17:15", endTime: "23:30", drivers: [] },
+            { id: "v_19", name: "Harzer Popschlager Open Air", datum: "08.08.2026", uhrzeit: "20:00", endTime: "23:30", drivers: [] },
+            { id: "v_20", name: "Die Prinzen mit Band", datum: "09.08.2026", uhrzeit: "19:00", endTime: "21:30", drivers: [] },
+            { id: "v_21", name: "Das Filmmusikkonzert XXL", datum: "13.08.2026", uhrzeit: "19:00", endTime: "22:00", drivers: [] },
+            { id: "v_22", name: "Saltatio Mortis", datum: "14.08.2026", uhrzeit: "19:00", endTime: "22:00", drivers: [] },
+            { id: "v_23", name: "Maggie Reilly – Everytime We Touch Tour", datum: "15.08.2026", uhrzeit: "19:30", endTime: "21:30", drivers: [] },
+            { id: "v_24", name: "VÖLKERBALL – A Tribute to Rammstein", datum: "21.08.2026", uhrzeit: "20:30", endTime: "22:30", drivers: [] },
+            { id: "v_25", name: "Münchener Freiheit – Live & Open Air", datum: "22.08.2026", uhrzeit: "20:00", endTime: "22:00", drivers: [] },
+            { id: "v_26", name: "Olaf Schubert und seine Freunde", datum: "26.08.2026", uhrzeit: "20:00", endTime: "22:00", drivers: [] },
+            { id: "v_27", name: "Walpurga – Das Musical", datum: "28.08.2026", uhrzeit: "20:00", endTime: "23:00", drivers: [] },
+            { id: "v_28", name: "Walpurga – Das Musical", datum: "29.08.2026", uhrzeit: "20:00", endTime: "23:00", drivers: [] },
+            { id: "v_30", name: "The Scottish Music Parade", datum: "31.08.2026", uhrzeit: "20:00", endTime: "22:00", drivers: [] },
+            { id: "v_31", name: "SILLY mit Julia Neigel – elektroAkustik", datum: "05.09.2026", uhrzeit: "20:00", endTime: "22:30", drivers: [] },
+            { id: "v_32", name: "Walpurga – Das Musical", datum: "10.09.2026", uhrzeit: "20:00", endTime: "23:00", drivers: [] },
+            { id: "v_33", name: "Walpurga – Das Musical", datum: "11.09.2026", uhrzeit: "20:00", endTime: "23:00", drivers: [] },
+            { id: "v_34", name: "Walpurga – Das Musical", datum: "12.09.2026", uhrzeit: "20:00", endTime: "23:00", drivers: [] },
+            { id: "v_35", name: "Invisible Touch – a Tribute to Phil Collins", datum: "18.09.2026", uhrzeit: "19:00", endTime: "21:30", drivers: [] },
+            { id: "v_36", name: "Thomas Anders sings Modern Talking", datum: "19.09.2026", uhrzeit: "19:00", endTime: "21:30", drivers: [] },
+            { id: "v_37", name: "Sophia – Durch die Blume | Open Air", datum: "20.09.2026", uhrzeit: "19:00", endTime: "21:00", drivers: [] }
         ];
 
         let localEvents = JSON.parse(localStorage.getItem('bergtheater_events')) || [];
 
+        // Strenge Logik zur Vermeidung von Duplikaten
         const mergedEvents = [];
 
         geladeneVeranstaltungen.forEach(neuEvent => {
@@ -311,7 +313,7 @@
             }); 
         }
 
-        // --- NEUE FUNKTIONEN: BEARBEITEN UND MANUELL ANLEGEN ---
+        // --- BEARBEITEN UND MANUELL ANLEGEN ---
         function openEditModal(id = null, e = null) {
             if(e) e.stopPropagation();
             document.getElementById('editModalTitle').innerText = id ? "Veranstaltung bearbeiten" : "Neue Veranstaltung";
@@ -391,9 +393,18 @@
             currentEventId = id; 
             const ev = events.find(e => e.id === id); 
             document.getElementById('modalTitle').innerText = ev.name; 
-            document.getElementById('modalDateTime').innerText = `${ev.datum} ab ${ev.uhrzeit} Uhr`; 
+            
+            let uhrzeitAnzeige = ev.uhrzeit ? String(ev.uhrzeit) : ""; 
+            if (uhrzeitAnzeige && !uhrzeitAnzeige.includes('Uhr')) uhrzeitAnzeige += ' Uhr'; 
+            if (ev.endTime) { 
+                let endZeit = String(ev.endTime); 
+                if (!endZeit.includes('Uhr')) endZeit += ' Uhr'; 
+                uhrzeitAnzeige += ` - ${endZeit}`; 
+            }
+
+            document.getElementById('modalDateTime').innerText = `${ev.datum} ab ${uhrzeitAnzeige}`; 
             document.getElementById('driverName').value = ''; 
-            document.getElementById('endTime').value = ev.endTime || ''; 
+            document.getElementById('endTime').value = ev.endTime ? ev.endTime.replace(' Uhr', '') : ''; 
             renderDriverList(ev); 
             document.getElementById('eventModal').classList.remove('hidden'); 
         }
@@ -485,6 +496,12 @@
             if(!name) return; 
             const ev = events.find(e => e.id === currentEventId); 
             if(!ev.drivers) ev.drivers = []; 
+            
+            const optionalEndTime = document.getElementById('endTime').value;
+            if(optionalEndTime) {
+                ev.endTime = optionalEndTime;
+            }
+
             ev.drivers.push({ 
                 name, 
                 duty: document.querySelector('input[name="duty"]:checked').value, 
@@ -493,6 +510,9 @@
             saveData(); 
             renderDriverList(ev); 
             renderEvents(); 
+            
+            // Zurücksetzen der Felder nach dem Hinzufügen
+            document.getElementById('driverName').value = '';
         }
 
         function removeDriver(index) { 
