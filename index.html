@@ -1,4 +1,4 @@
-   <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="de">
 <head>
     <meta charset="UTF-8">
@@ -38,23 +38,31 @@
 
     <header class="bg-indigo-600 text-white p-4 shadow-md sticky top-0 z-10 no-print">
         <h1 class="text-xl font-bold text-center mb-4"><i class="fa-solid fa-van-shuttle mr-2"></i> Fahrer-Planer</h1>
-        <div class="grid grid-cols-5 gap-2 text-xs">
+        <div class="grid grid-cols-3 sm:grid-cols-6 gap-2 text-xs">
             <button onclick="document.getElementById('excelUpload').click()" class="bg-indigo-500 hover:bg-indigo-400 p-2 rounded flex flex-col items-center justify-center transition">
-                <i class="fa-solid fa-file-excel text-lg mb-1"></i> <span class="text-center">Excel<br>Import</span>
+                <i class="fa-solid fa-file-excel text-lg mb-1"></i> <span class="text-center">Import</span>
             </button>
             <input type="file" id="excelUpload" accept=".xlsx, .xls" class="hidden" onchange="handleExcelImport(event)">
+            
             <button onclick="exportBackup()" class="bg-indigo-500 hover:bg-indigo-400 p-2 rounded flex flex-col items-center justify-center transition">
-                <i class="fa-solid fa-download text-lg mb-1"></i> <span class="text-center">Backup<br>Speichern</span>
+                <i class="fa-solid fa-download text-lg mb-1"></i> <span class="text-center">Speichern</span>
             </button>
+            
             <button onclick="document.getElementById('backupUpload').click()" class="bg-indigo-500 hover:bg-indigo-400 p-2 rounded flex flex-col items-center justify-center transition">
-                <i class="fa-solid fa-upload text-lg mb-1"></i> <span class="text-center">Backup<br>Laden</span>
+                <i class="fa-solid fa-upload text-lg mb-1"></i> <span class="text-center">Laden</span>
             </button>
             <input type="file" id="backupUpload" accept=".json, application/json, text/plain, */*" class="hidden" onchange="handleBackupImport(event)">
+            
+            <button onclick="openEditModal()" class="bg-indigo-500 hover:bg-indigo-400 p-2 rounded flex flex-col items-center justify-center transition">
+                <i class="fa-solid fa-plus text-lg mb-1"></i> <span class="text-center">Manuell</span>
+            </button>
+
             <button onclick="deleteAllEvents()" class="bg-red-500 hover:bg-red-400 p-2 rounded flex flex-col items-center justify-center transition">
                 <i class="fa-solid fa-trash-can text-lg mb-1"></i> <span class="text-center">Alle<br>Löschen</span>
             </button>
+            
             <button onclick="window.print()" class="bg-indigo-500 hover:bg-indigo-400 p-2 rounded flex flex-col items-center justify-center transition">
-                <i class="fa-solid fa-print text-lg mb-1"></i> <span class="text-center">Liste<br>Drucken</span>
+                <i class="fa-solid fa-print text-lg mb-1"></i> <span class="text-center">Drucken</span>
             </button>
         </div>
     </header>
@@ -66,7 +74,12 @@
             <div class="p-4 border-b flex justify-between items-center sticky top-0 bg-white rounded-t-2xl z-10">
                 <h2 id="modalTitle" class="font-bold text-lg truncate pr-2">Event</h2>
                 <div class="flex items-center space-x-4 modal-no-print">
-                    <button id="modalPrintBtn" onclick="printModal()" class="text-indigo-600 hover:text-indigo-800 hidden" title="Veranstaltung drucken"><i class="fa-solid fa-print text-xl"></i></button>
+                    <button onclick="shareEventModal()" class="text-blue-500 hover:text-blue-700" title="Gesamtes Event teilen">
+                        <i class="fa-solid fa-share-nodes text-xl"></i>
+                    </button>
+                    <button id="modalPrintBtn" onclick="printModal()" class="text-indigo-600 hover:text-indigo-800" title="Veranstaltung drucken">
+                        <i class="fa-solid fa-print text-xl"></i>
+                    </button>
                     <button onclick="closeModal()" class="text-slate-500 hover:text-slate-700 text-3xl leading-none">&times;</button>
                 </div>
             </div>
@@ -99,11 +112,40 @@
         </div>
     </div>
 
+    <div id="editEventModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex justify-center items-center">
+        <div class="bg-white w-full max-w-md rounded-2xl p-4 mx-4 flex flex-col shadow-xl">
+            <div class="flex justify-between items-center mb-4 border-b pb-2">
+                <h2 id="editModalTitle" class="font-bold text-lg text-indigo-700">Veranstaltung</h2>
+                <button onclick="closeEditModal()" class="text-slate-500 hover:text-slate-700 text-3xl leading-none">&times;</button>
+            </div>
+            <div class="space-y-4">
+                <input type="hidden" id="editEventId">
+                <div>
+                    <label class="text-sm font-medium text-slate-700">Name der Veranstaltung</label>
+                    <input type="text" id="editName" class="w-full p-2 border rounded focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="z.B. Walpurga">
+                </div>
+                <div>
+                    <label class="text-sm font-medium text-slate-700">Datum (Format: TT.MM.JJJJ)</label>
+                    <input type="text" id="editDatum" class="w-full p-2 border rounded focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="12.06.2026">
+                </div>
+                <div class="flex space-x-3">
+                    <div class="w-1/2">
+                        <label class="text-sm font-medium text-slate-700">Beginn</label>
+                        <input type="time" id="editStart" class="w-full p-2 border rounded focus:ring-2 focus:ring-indigo-500 outline-none">
+                    </div>
+                    <div class="w-1/2">
+                        <label class="text-sm font-medium text-slate-700">Ende (optional)</label>
+                        <input type="time" id="editEnd" class="w-full p-2 border rounded focus:ring-2 focus:ring-indigo-500 outline-none">
+                    </div>
+                </div>
+                <button onclick="saveEditedEvent()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded mt-4 transition shadow-sm">Speichern</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         const fahrerNamen = ["Marco Pfeiffer", "Michaela Lüders", "Michael Lüders", "Kevin Gawe", "Tommy Wall", "Nicole Ritzrau", "Kimberley", "Uwe Busse", "Thomas Kaufmann"];
         
-        // Liste mit exakten Startzeiten aus dem Spielplan-PDF und bereinigten Endzeiten.
-        // Endzeiten wurden nur dort hinterlegt, wo sie offiziell im System abrufbar sind.
         const geladeneVeranstaltungen = [
             { id: "v_1", name: "voXXclub – Lederhos'n Inferno Tour", datum: "12.06.2026", uhrzeit: "20:00", endTime: "22:00", drivers: [] },
             { id: "v_2", name: "Spider Murphy Gang – Rock'n'Roll Tour 2026", datum: "13.06.2026", uhrzeit: "20:00", endTime: "22:30", drivers: [] },
@@ -145,10 +187,6 @@
 
         let localEvents = JSON.parse(localStorage.getItem('bergtheater_events')) || [];
 
-        // STRICT DEDUPLICATION LOGIC:
-        // Überschreibt existierende lokale Events basierend auf dem DATUM.
-        // Falls ein lokales Event am selben Tag liegt, werden die Fahrer gerettet 
-        // und die neuen, sauberen Angaben überschreiben den alten fehlerhaften Eintrag.
         const mergedEvents = [];
 
         geladeneVeranstaltungen.forEach(neuEvent => {
@@ -159,8 +197,6 @@
         localEvents.forEach(localEv => {
             const existing = mergedEvents.find(e => e.datum === localEv.datum);
             if (existing) {
-                // Ein lokales Event mit demselben Datum existiert. 
-                // Wir übernehmen NUR die manuell hinzugefügten Fahrer, nicht die falschen Uhrzeiten/Namen.
                 if (localEv.drivers && localEv.drivers.length > 0) {
                     localEv.drivers.forEach(d => {
                         if (!existing.drivers.find(ed => ed.name === d.name)) {
@@ -169,7 +205,6 @@
                     });
                 }
             } else {
-                // Event liegt an einem Tag, an dem wir nichts vorgegeben haben (z.B. manuell importiert via Excel)
                 mergedEvents.push(localEv);
             }
         });
@@ -259,10 +294,81 @@
                 const card = document.createElement('div'); 
                 card.className = "event-card bg-white p-4 rounded-xl shadow-sm border border-slate-200 cursor-pointer hover:border-indigo-400 transition"; 
                 card.onclick = () => openModal(ev.id); 
-                card.innerHTML = `<div class="flex justify-between items-start mb-2"><h3 class="font-bold text-lg leading-tight text-slate-800">${ev.name}</h3><button onclick="deleteEvent('${ev.id}', event)" class="text-red-400 hover:text-red-600 px-2 no-print"><i class="fa-solid fa-trash-can"></i></button></div><div class="text-sm text-slate-600 mb-3 font-medium"><i class="fa-regular fa-calendar text-indigo-500 mr-1"></i> ${getWochentag(ev.datum)} ${ev.datum} | <i class="fa-regular fa-clock text-indigo-500 mr-1"></i> ${uhrzeitAnzeige}</div><div class="border-t pt-3 mt-2">${driverNames}</div>`; 
+                card.innerHTML = `
+                    <div class="flex justify-between items-start mb-2">
+                        <h3 class="font-bold text-lg leading-tight text-slate-800">${ev.name}</h3>
+                        <div class="flex space-x-1 modal-no-print">
+                            <button onclick="openEditModal('${ev.id}', event)" class="text-blue-400 hover:text-blue-600 px-2" title="Bearbeiten"><i class="fa-solid fa-pen"></i></button>
+                            <button onclick="deleteEvent('${ev.id}', event)" class="text-red-400 hover:text-red-600 px-2" title="Löschen"><i class="fa-solid fa-trash-can"></i></button>
+                        </div>
+                    </div>
+                    <div class="text-sm text-slate-600 mb-3 font-medium">
+                        <i class="fa-regular fa-calendar text-indigo-500 mr-1"></i> ${getWochentag(ev.datum)} ${ev.datum} | <i class="fa-regular fa-clock text-indigo-500 mr-1"></i> ${uhrzeitAnzeige}
+                    </div>
+                    <div class="border-t pt-3 mt-2">${driverNames}</div>
+                `; 
                 container.appendChild(card); 
             }); 
         }
+
+        // --- NEUE FUNKTIONEN: BEARBEITEN UND MANUELL ANLEGEN ---
+        function openEditModal(id = null, e = null) {
+            if(e) e.stopPropagation();
+            document.getElementById('editModalTitle').innerText = id ? "Veranstaltung bearbeiten" : "Neue Veranstaltung";
+            if(id) {
+                const ev = events.find(event => event.id === id);
+                document.getElementById('editEventId').value = ev.id;
+                document.getElementById('editName').value = ev.name;
+                document.getElementById('editDatum').value = ev.datum;
+                document.getElementById('editStart').value = ev.uhrzeit ? ev.uhrzeit.replace(' Uhr', '') : '';
+                document.getElementById('editEnd').value = ev.endTime ? ev.endTime.replace(' Uhr', '') : '';
+            } else {
+                document.getElementById('editEventId').value = '';
+                document.getElementById('editName').value = '';
+                document.getElementById('editDatum').value = '';
+                document.getElementById('editStart').value = '';
+                document.getElementById('editEnd').value = '';
+            }
+            document.getElementById('editEventModal').classList.remove('hidden');
+        }
+
+        function closeEditModal() {
+            document.getElementById('editEventModal').classList.add('hidden');
+        }
+
+        function saveEditedEvent() {
+            const id = document.getElementById('editEventId').value;
+            const name = document.getElementById('editName').value;
+            const datum = document.getElementById('editDatum').value;
+            const start = document.getElementById('editStart').value;
+            const end = document.getElementById('editEnd').value;
+
+            if(!name || !datum) {
+                alert("Bitte mindestens einen Namen und ein Datum eintragen.");
+                return;
+            }
+
+            if(id) {
+                const ev = events.find(e => e.id === id);
+                ev.name = name;
+                ev.datum = datum;
+                ev.uhrzeit = start;
+                ev.endTime = end;
+            } else {
+                events.push({
+                    id: 'v_' + Date.now(),
+                    name: name,
+                    datum: datum,
+                    uhrzeit: start,
+                    endTime: end,
+                    drivers: []
+                });
+            }
+            saveData();
+            closeEditModal();
+            renderEvents();
+        }
+        // -----------------------------------------------------
 
         function deleteEvent(id, e) { 
             e.stopPropagation(); 
@@ -303,15 +409,75 @@
             setTimeout(() => document.body.classList.remove('print-modal-mode'), 500); 
         }
 
+        function shareEventModal() {
+            const ev = events.find(e => e.id === currentEventId);
+            let text = `Veranstaltung: ${ev.name}\nDatum: ${ev.datum}\nBeginn: ${ev.uhrzeit} Uhr\n`;
+            if(ev.endTime) text += `Ende ca.: ${ev.endTime} Uhr\n`;
+            text += `\nEingeteilte Fahrer:\n`;
+            if(!ev.drivers || ev.drivers.length === 0) text += `- Keine Fahrer eingeteilt -\n`;
+            else {
+                ev.drivers.forEach(d => {
+                    text += `- ${d.name} (${d.duty}, Besuch: ${d.attends})\n`;
+                });
+            }
+            if(navigator.share) {
+                navigator.share({ title: 'Event-Infos: ' + ev.name, text: text }).catch(console.error);
+            } else {
+                prompt("Dein Gerät unterstützt kein direktes Teilen. Bitte kopiere diesen Text:", text);
+            }
+        }
+
         function renderDriverList(ev) { 
             const container = document.getElementById('driverList'); 
             container.innerHTML = ''; 
             ev.drivers?.forEach((d, index) => { 
                 const div = document.createElement('div'); 
-                div.className = "bg-white border rounded-lg p-3 flex justify-between"; 
-                div.innerHTML = `<div><div class="font-bold">${d.name}</div><div class="text-xs">Fahrt: ${d.duty} | Besuch: ${d.attends}</div></div><button onclick="removeDriver(${index})" class="text-red-600"><i class="fa-solid fa-trash"></i></button>`; 
+                div.className = "bg-white border rounded-lg p-3 flex flex-col sm:flex-row justify-between items-start sm:items-center shadow-sm"; 
+                div.innerHTML = `
+                    <div class="mb-2 sm:mb-0">
+                        <div class="font-bold text-slate-800">${d.name}</div>
+                        <div class="text-xs text-slate-500 mt-1">
+                            Fahrt: <b class="text-slate-700">${d.duty}</b> &nbsp;|&nbsp; Besuch: <b class="text-slate-700">${d.attends}</b>
+                        </div>
+                    </div>
+                    <div class="flex space-x-2 w-full sm:w-auto modal-no-print">
+                        <button onclick="shareDriverInfo(${index})" class="flex-1 sm:flex-none bg-blue-500 text-white p-2 rounded text-sm hover:bg-blue-600 transition"><i class="fa-solid fa-share-nodes mr-1"></i> Teilen</button>
+                        <button onclick="removeDriver(${index})" class="bg-red-100 text-red-600 p-2 rounded text-sm hover:bg-red-200 transition"><i class="fa-solid fa-trash"></i></button>
+                    </div>
+                `; 
                 container.appendChild(div); 
             }); 
+        }
+
+        function shareDriverInfo(driverIndex) {
+            const ev = events.find(e => e.id === currentEventId);
+            const d = ev.drivers[driverIndex];
+            
+            let startZeit = ev.uhrzeit ? String(ev.uhrzeit) : "";
+            if(startZeit && !startZeit.includes('Uhr')) startZeit += ' Uhr';
+            
+            let endeText = "Ende: nach Rücksprache";
+            if (ev.endTime) {
+                let endZeitShare = String(ev.endTime);
+                if (!endZeitShare.includes('Uhr')) {
+                    endZeitShare += ' Uhr';
+                }
+                endeText = `Ende ca.: ${endZeitShare}`;
+            }
+
+            const wochentag = getWochentag(ev.datum);
+            const datumAnzeige = wochentag ? `${wochentag} ${ev.datum}` : ev.datum;
+
+            const text = `Hallo ${d.name},\nhier sind deine Einsatzdaten für das Bergtheater:\n\nVeranstaltung: ${ev.name}\nDatum: ${datumAnzeige}\nBeginn: ${startZeit}\n${endeText}\n\nDein Dienst: ${d.duty}\nBesuch der Veranstaltung: ${d.attends}\n\nBitte bestätigen. Danke!`;
+
+            if (navigator.share) {
+                navigator.share({
+                    title: 'Fahrer-Einteilung Bergtheater',
+                    text: text
+                }).catch(console.error);
+            } else {
+                prompt("Dein Gerät unterstützt kein direktes Teilen. Bitte kopiere diesen Text:", text);
+            }
         }
 
         function addDriver() { 
